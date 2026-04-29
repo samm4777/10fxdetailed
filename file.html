@@ -1,0 +1,2131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>10FX Trading Academy</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   RESET & ROOT VARIABLES
+   ============================================================ */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --teal:        #00f5d4;
+  --teal-dim:    #00c4a8;
+  --teal-glow:   rgba(0,245,212,0.25);
+  --teal-faint:  rgba(0,245,212,0.08);
+  --silver:      #c0c8d8;
+  --silver-dim:  #8a94a8;
+  --silver-light:#cfd8dc;
+  --gold:        #ffd700;
+  --green:       #00e676;
+  --red:         #ff1744;
+  --bg:          #0a0a0c;
+  --bg2:         #0f0f14;
+  --bg3:         #14141c;
+  --bg-card:     rgba(255,255,255,0.04);
+  --glass:       rgba(255,255,255,0.04);
+  --glass-b:     rgba(0,245,212,0.15);
+  --border:      rgba(0,245,212,0.15);
+  --border-dim:  rgba(255,255,255,0.06);
+  --text:        #e8eaf0;
+  --text-dim:    #7a8090;
+  --radius:      14px;
+  --radius-lg:   20px;
+  --nav-h:       72px;
+  --font:        'Inter', 'Segoe UI', system-ui, sans-serif;
+  --font-display:'Space Grotesk', system-ui, sans-serif;
+  --transition:  0.3s cubic-bezier(0.4,0,0.2,1);
+  --shadow:      0 8px 32px rgba(0,0,0,0.5);
+}
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: var(--font);
+  background: var(--bg);
+  color: var(--text);
+  overflow-x: hidden;
+  cursor: none;
+}
+
+a { color: inherit; text-decoration: none; }
+ul { list-style: none; }
+img { max-width: 100%; display: block; }
+
+/* ============================================================
+   CUSTOM CURSOR
+   ============================================================ */
+#cursor-dot {
+  position: fixed; top: 0; left: 0; z-index: 99999;
+  width: 10px; height: 10px; border-radius: 50%;
+  background: var(--teal);
+  pointer-events: none;
+  transform: translate(-50%,-50%);
+  transition: transform 0.1s ease;
+  box-shadow: 0 0 12px var(--teal), 0 0 30px var(--teal-glow);
+}
+#cursor-ring {
+  position: fixed; top: 0; left: 0; z-index: 99998;
+  width: 32px; height: 32px; border-radius: 50%;
+  border: 1.5px solid var(--teal);
+  pointer-events: none;
+  transform: translate(-50%,-50%);
+  transition: all 0.18s cubic-bezier(.25,.46,.45,.94);
+  opacity: 0.6;
+}
+#cursor-ring.expand { width: 52px; height: 52px; background: var(--teal-glow); opacity: 1; }
+
+/* ============================================================
+   SCROLL PROGRESS
+   ============================================================ */
+#scroll-progress {
+  position: fixed; top: 0; left: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--teal-dim), var(--teal));
+  box-shadow: 0 0 8px var(--teal-glow);
+  z-index: 9998; width: 0%;
+  transition: width 0.1s linear;
+}
+
+/* ============================================================
+   LOADER
+   ============================================================ */
+#loader {
+  position: fixed; inset: 0; z-index: 99990;
+  background: var(--bg);
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  gap: 24px;
+  transition: opacity 0.8s ease, visibility 0.8s ease;
+}
+#loader.hide { opacity: 0; visibility: hidden; }
+#loader-logo {
+  width: 180px;
+  animation: logoPulse 1.5s ease-in-out infinite;
+  filter: drop-shadow(0 0 20px var(--teal)) drop-shadow(0 0 60px rgba(0,245,212,0.4));
+}
+@keyframes logoPulse {
+  0%,100% { transform: scale(1); filter: drop-shadow(0 0 18px var(--teal)) drop-shadow(0 0 50px var(--teal-glow)); }
+  50%      { transform: scale(1.06); filter: drop-shadow(0 0 36px var(--teal)) drop-shadow(0 0 90px rgba(0,245,212,0.6)); }
+}
+.loader-bar-wrap { width: 220px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 99px; overflow: hidden; }
+.loader-bar {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--teal-dim), var(--teal));
+  border-radius: 99px;
+  animation: loadBar 2.2s ease forwards;
+}
+@keyframes loadBar { to { width: 100%; } }
+.loader-text { font-size: 0.75rem; letter-spacing: 4px; color: var(--teal-dim); text-transform: uppercase; animation: blink 1s step-start infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+
+/* ============================================================
+   FOREX TICKER
+   ============================================================ */
+#ticker {
+  position: fixed; top: 0; left: 0; right: 0;
+  height: 28px; z-index: 1000;
+  background: rgba(10,10,12,0.95);
+  border-bottom: 1px solid rgba(0,245,212,0.2);
+  overflow: hidden; display: flex; align-items: center;
+}
+.ticker-track { display: flex; gap: 0; white-space: nowrap; animation: tickerScroll 30s linear infinite; }
+.ticker-item {
+  padding: 0 28px; font-size: 0.7rem; letter-spacing: 1px;
+  border-right: 1px solid rgba(255,255,255,0.06);
+  display: flex; gap: 8px; align-items: center;
+}
+.ticker-sym { color: var(--silver); font-weight: 600; }
+.ticker-val { color: var(--text); }
+.ticker-chg.up   { color: #00e676; }
+.ticker-chg.down { color: #ff5252; }
+@keyframes tickerScroll { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+#navbar {
+  position: fixed; top: 28px; left: 0; right: 0;
+  height: var(--nav-h); z-index: 900;
+  display: flex; align-items: center;
+  padding: 0 5%;
+  background: rgba(10,10,12,0.7);
+  backdrop-filter: blur(20px) saturate(1.5);
+  border-bottom: 1px solid rgba(0,245,212,0.1);
+  transition: box-shadow 0.4s;
+}
+#navbar.scrolled { box-shadow: 0 0 40px rgba(0,245,212,0.08), 0 2px 0 rgba(0,245,212,0.2); }
+.nav-logo { height: 44px; cursor: pointer; }
+.nav-links { display: flex; gap: 6px; margin-left: auto; margin-right: 24px; list-style: none; }
+.nav-links li a {
+  padding: 7px 13px; font-size: 0.82rem; letter-spacing: 0.5px;
+  color: var(--silver-dim); text-decoration: none;
+  border-radius: 8px; transition: color 0.2s, background 0.2s; cursor: pointer;
+}
+.nav-links li a:hover, .nav-links li a.active { color: var(--teal); background: rgba(0,245,212,0.08); }
+.nav-cta {
+  padding: 9px 20px; background: var(--teal); color: #000 !important;
+  font-weight: 700; border-radius: 8px; font-size: 0.82rem;
+  letter-spacing: 0.5px; text-decoration: none; cursor: pointer;
+  transition: box-shadow 0.2s, transform 0.2s;
+}
+.nav-cta:hover { box-shadow: 0 0 24px var(--teal-glow); transform: translateY(-1px); }
+.hamburger { display: none; flex-direction: column; gap: 5px; cursor: pointer; margin-left: auto; }
+.hamburger span { display: block; width: 24px; height: 2px; background: var(--teal); border-radius: 2px; transition: all 0.3s; }
+.mobile-menu {
+  display: none; position: fixed;
+  top: calc(28px + var(--nav-h)); left: 0; right: 0;
+  background: rgba(10,10,12,0.98); backdrop-filter: blur(24px);
+  padding: 20px 5% 30px; border-bottom: 1px solid rgba(0,245,212,0.15);
+  z-index: 899; flex-direction: column; gap: 4px;
+}
+.mobile-menu.open { display: flex; }
+.mobile-menu a { padding: 12px 16px; color: var(--silver); text-decoration: none; font-size: 0.95rem; border-radius: 8px; transition: all 0.2s; }
+.mobile-menu a:hover { color: var(--teal); background: rgba(0,245,212,0.07); }
+
+/* ============================================================
+   PAGE WRAPPER & ROUTING
+   ============================================================ */
+#app { padding-top: calc(28px + var(--nav-h)); min-height: 100vh; }
+.page { display: none; }
+.page.active { display: block; }
+
+/* ============================================================
+   GLOBAL COMPONENTS
+   ============================================================ */
+.glass {
+  background: var(--glass);
+  border: 1px solid var(--glass-b);
+  border-radius: var(--radius);
+  backdrop-filter: blur(16px) saturate(1.4);
+}
+.section { padding: 90px 5%; max-width: 1280px; margin: 0 auto; }
+.section-tag {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 5px 14px; background: rgba(0,245,212,0.08);
+  border: 1px solid rgba(0,245,212,0.25); border-radius: 99px;
+  font-size: 0.72rem; letter-spacing: 3px; color: var(--teal);
+  text-transform: uppercase; margin-bottom: 18px;
+}
+.section-title {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3rem); font-weight: 800; line-height: 1.15;
+  margin-bottom: 16px;
+  background: linear-gradient(135deg, #fff 30%, var(--teal) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.section-sub { font-size: 1.05rem; color: var(--text-dim); max-width: 620px; line-height: 1.7; margin-bottom: 48px; }
+.gradient-text {
+  background: linear-gradient(135deg, var(--teal), #80ffff);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+}
+.reveal { opacity: 0; transform: translateY(40px); transition: opacity 0.7s ease, transform 0.7s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+.btn-neon {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; background: transparent;
+  border: 1.5px solid var(--teal); color: var(--teal);
+  border-radius: 8px; font-size: 0.9rem; font-weight: 600; letter-spacing: 1px;
+  cursor: pointer; text-decoration: none; transition: all 0.25s; position: relative; overflow: hidden;
+}
+.btn-neon::before {
+  content: ''; position: absolute; inset: 0; background: var(--teal);
+  transform: scaleX(0); transform-origin: left; transition: transform 0.3s ease; z-index: -1;
+}
+.btn-neon:hover { color: #000; box-shadow: 0 0 30px var(--teal-glow); }
+.btn-neon:hover::before { transform: scaleX(1); }
+.btn-solid {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 13px 28px; background: var(--teal); color: #000;
+  border: none; border-radius: 8px; font-size: 0.9rem; font-weight: 700;
+  letter-spacing: 0.5px; cursor: pointer; text-decoration: none; transition: all 0.25s;
+}
+.btn-solid:hover { box-shadow: 0 0 36px rgba(0,245,212,0.45); transform: translateY(-2px); }
+.btn-primary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal));
+  color: #000; font-weight: 700; font-size: 0.95rem;
+  border-radius: var(--radius); transition: all var(--transition);
+  border: none; cursor: pointer; box-shadow: 0 4px 20px var(--teal-glow);
+  text-decoration: none;
+}
+.btn-primary:hover { transform: translateY(-2px); box-shadow: 0 8px 32px var(--teal-glow); }
+.btn-secondary {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 14px 28px; background: transparent; color: var(--teal);
+  font-weight: 600; font-size: 0.95rem; border-radius: var(--radius);
+  border: 1.5px solid var(--border); transition: all var(--transition); cursor: pointer;
+  text-decoration: none;
+}
+.btn-secondary:hover { background: var(--teal-faint); border-color: var(--teal); transform: translateY(-2px); }
+.btn-outline {
+  display: block; text-align: center; padding: 13px 24px;
+  border: 1.5px solid var(--border-dim); color: var(--text);
+  font-weight: 600; border-radius: var(--radius); transition: all var(--transition); cursor: pointer;
+  text-decoration: none;
+}
+.btn-outline:hover { border-color: var(--teal); color: var(--teal); background: var(--teal-faint); }
+.btn-vip {
+  display: block; text-align: center; padding: 13px 24px;
+  background: linear-gradient(135deg, #c79a00, var(--gold), #ffeaa0);
+  color: #000; font-weight: 700; border-radius: var(--radius);
+  border: none; cursor: pointer; transition: all var(--transition);
+  box-shadow: 0 4px 20px rgba(255,215,0,0.3); text-decoration: none;
+}
+.btn-vip:hover { transform: translateY(-2px); box-shadow: 0 8px 32px rgba(255,215,0,0.45); }
+.grid-bg {
+  position: absolute; inset: 0; pointer-events: none;
+  background-image: linear-gradient(rgba(0,245,212,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,212,0.04) 1px, transparent 1px);
+  background-size: 60px 60px;
+}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg2); }
+::-webkit-scrollbar-thumb { background: var(--teal-dim); border-radius: 3px; }
+
+/* ============================================================
+   PAGE 1 — HOME (UPDATED)
+   ============================================================ */
+
+/* --- HERO --- */
+.home-hero {
+  position: relative;
+  min-height: calc(100vh - 100px);
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 60px;
+  padding: 60px 5% 80px;
+  overflow: hidden;
+}
+.hero-canvas { position: absolute; inset: 0; z-index: 0; opacity: 0.15; pointer-events: none; }
+.hero-grid-bg {
+  position: absolute; inset: 0;
+  background-image: linear-gradient(rgba(0,245,212,0.04) 1px, transparent 1px), linear-gradient(90deg, rgba(0,245,212,0.04) 1px, transparent 1px);
+  background-size: 60px 60px; pointer-events: none;
+}
+.hero-particles { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.particle {
+  position: absolute; width: 3px; height: 3px;
+  background: var(--teal); border-radius: 50%; opacity: 0;
+  animation: float-particle var(--dur, 8s) ease-in-out infinite var(--delay, 0s);
+  box-shadow: 0 0 6px var(--teal);
+}
+@keyframes float-particle {
+  0% { opacity: 0; transform: translateY(100vh) translateX(0); }
+  10% { opacity: 0.8; } 90% { opacity: 0.4; }
+  100% { opacity: 0; transform: translateY(-100px) translateX(40px); }
+}
+.hero-content { position: relative; z-index: 2; }
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 16px; background: var(--teal-faint);
+  border: 1px solid var(--border); border-radius: 100px;
+  font-size: 0.8rem; font-weight: 600; color: var(--teal);
+  margin-bottom: 24px; animation: badge-pulse 2s ease-in-out infinite;
+}
+.badge-dot {
+  width: 8px; height: 8px; background: var(--green);
+  border-radius: 50%; box-shadow: 0 0 8px var(--green);
+  animation: dot-blink 1.4s ease-in-out infinite;
+}
+@keyframes badge-pulse { 0%,100% { border-color: var(--border); } 50% { border-color: var(--teal); box-shadow: 0 0 12px var(--teal-glow); } }
+@keyframes dot-blink { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.4rem, 5.5vw, 4rem); font-weight: 800;
+  line-height: 1.1; letter-spacing: -1px; margin-bottom: 16px;
+}
+.hero-sub {
+  font-size: 1.1rem; font-weight: 600; color: var(--teal);
+  letter-spacing: 2px; margin-bottom: 16px;
+  text-shadow: 0 0 20px var(--teal-glow);
+}
+.hero-desc { font-size: 1rem; color: var(--text-dim); line-height: 1.7; max-width: 480px; margin-bottom: 36px; }
+.hero-ctas { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
+.hero-stats { display: flex; align-items: center; gap: 24px; flex-wrap: wrap; }
+.hero-stat { text-align: left; }
+.hero-stat strong { display: block; font-size: 1.6rem; font-weight: 800; color: var(--teal); font-family: var(--font-display); }
+.hero-stat span { font-size: 0.78rem; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.hero-stat-divider { width: 1px; height: 36px; background: var(--border-dim); }
+
+/* Hero Visual */
+.hero-visual {
+  position: relative; z-index: 2;
+  display: flex; align-items: center; justify-content: center;
+  animation: float-visual 4s ease-in-out infinite;
+}
+@keyframes float-visual { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-16px); } }
+.chart-card {
+  padding: 24px; border-radius: var(--radius-lg);
+  border-color: var(--border);
+  box-shadow: var(--shadow), 0 0 40px var(--teal-glow);
+  width: 100%; max-width: 340px;
+}
+.chart-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
+.pair-tag { font-weight: 700; font-size: 1rem; color: var(--silver-light); font-family: var(--font-display); }
+.win-tag { font-weight: 700; font-size: 0.85rem; color: var(--green); background: rgba(0,230,118,0.1); padding: 4px 10px; border-radius: 6px; }
+.chart-card-footer { display: flex; justify-content: space-between; margin-top: 12px; font-size: 0.82rem; color: var(--text-dim); }
+.chart-card-footer .green { color: var(--green); }
+
+/* Scroll hint */
+.hero-scroll-hint {
+  position: absolute; bottom: 32px; left: 50%; transform: translateX(-50%);
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0.5; z-index: 2; font-size: 0.75rem; color: var(--text-dim);
+  letter-spacing: 1.5px; text-transform: uppercase;
+}
+.scroll-mouse { width: 22px; height: 36px; border: 2px solid var(--text-dim); border-radius: 12px; position: relative; }
+.scroll-mouse::after {
+  content: ''; position: absolute; top: 6px; left: 50%; transform: translateX(-50%);
+  width: 3px; height: 8px; background: var(--teal); border-radius: 2px;
+  animation: scroll-wheel 2s ease-in-out infinite;
+}
+@keyframes scroll-wheel { 0%,100% { top: 6px; opacity: 1; } 100% { top: 20px; opacity: 0; } }
+
+/* --- HOME TICKER SECTION --- */
+.home-ticker-wrap {
+  background: linear-gradient(135deg, rgba(0,245,212,0.08), rgba(0,168,168,0.06));
+  border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);
+  overflow: hidden; height: 44px; display: flex; align-items: center;
+}
+.home-ticker-track { display: flex; gap: 0; animation: tickerScroll 30s linear infinite; white-space: nowrap; }
+.home-ticker-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 0 32px; font-size: 0.8rem; font-weight: 600;
+  border-right: 1px solid var(--border-dim);
+}
+.ht-pair { color: var(--silver-light); }
+.ht-price { color: var(--text-dim); }
+.ht-chg { padding: 2px 6px; border-radius: 4px; font-weight: 700; font-size: 0.75rem; }
+.ht-up { color: var(--green); background: rgba(0,230,118,0.1); }
+.ht-down { color: var(--red); background: rgba(255,23,68,0.1); }
+
+/* --- HOME SIGNALS SECTION --- */
+.home-signals-section { background: var(--bg2); padding: 90px 0; }
+.home-signals-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.signals-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px; margin-bottom: 48px;
+}
+.signal-card {
+  padding: 24px; border-radius: var(--radius-lg);
+  background: var(--glass); border: 1px solid var(--border-dim);
+  backdrop-filter: blur(12px);
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative; overflow: hidden;
+}
+.signal-card::before {
+  content: ''; position: absolute; top: 0; left: 0; right: 0;
+  height: 3px; border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+.signal-card.win::before { background: linear-gradient(90deg, var(--green), rgba(0,230,118,0.3)); }
+.signal-card.loss::before { background: linear-gradient(90deg, var(--red), rgba(255,23,68,0.3)); }
+.signal-card.pending::before { background: linear-gradient(90deg, var(--teal), rgba(0,245,212,0.3)); }
+.signal-card:hover { transform: translateY(-4px); box-shadow: var(--shadow), 0 0 24px var(--teal-glow); }
+.signal-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px; }
+.signal-pair { font-family: var(--font-display); font-size: 1.25rem; font-weight: 700; color: var(--silver-light); }
+.signal-type { font-size: 0.72rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; text-transform: uppercase; letter-spacing: 1px; }
+.type-buy { background: rgba(0,230,118,0.12); color: var(--green); }
+.type-sell { background: rgba(255,23,68,0.12); color: var(--red); }
+.signal-levels { margin-bottom: 16px; }
+.level-row { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid var(--border-dim); font-size: 0.85rem; }
+.level-label { color: var(--text-dim); }
+.level-value { font-weight: 600; color: var(--text); }
+.signal-result { display: flex; justify-content: space-between; align-items: center; margin-top: 14px; }
+.result-badge { font-size: 0.8rem; font-weight: 700; padding: 5px 12px; border-radius: 8px; display: flex; align-items: center; gap: 6px; }
+.result-win { background: rgba(0,230,118,0.12); color: var(--green); }
+.result-loss { background: rgba(255,23,68,0.12); color: var(--red); }
+.result-pending { background: rgba(0,245,212,0.1); color: var(--teal); }
+.result-glow { width: 10px; height: 10px; border-radius: 50%; animation: glow-pulse 1.5s ease-in-out infinite; }
+.glow-green { background: var(--green); box-shadow: 0 0 8px var(--green); }
+.glow-red { background: var(--red); box-shadow: 0 0 8px var(--red); }
+.glow-teal { background: var(--teal); box-shadow: 0 0 8px var(--teal); }
+@keyframes glow-pulse { 0%,100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.3); opacity: 0.6; } }
+.signals-cta { text-align: center; }
+
+/* --- HOME PSYCHOLOGY SECTION --- */
+.home-psych-section { padding: 90px 0; }
+.home-psych-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.psych-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 20px; }
+.psych-card {
+  padding: 28px; border-radius: var(--radius-lg);
+  background: var(--glass); border: 1px solid var(--border-dim);
+  backdrop-filter: blur(12px);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+}
+.psych-card:hover { transform: translateY(-4px); box-shadow: var(--shadow), 0 0 20px var(--teal-glow); border-color: var(--border); }
+.psych-icon { font-size: 2rem; margin-bottom: 14px; display: inline-block; transition: transform var(--transition); }
+.psych-card:hover .psych-icon { transform: scale(1.2); }
+.psych-card h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; }
+.psych-card p { font-size: 0.9rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 18px; }
+.psych-meter { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; margin-bottom: 8px; }
+.psych-meter-fill { height: 100%; background: linear-gradient(90deg, var(--teal-dim), var(--teal)); border-radius: 2px; width: 0%; transition: width 1.2s ease; box-shadow: 0 0 6px var(--teal-glow); }
+.psych-metric { font-size: 0.75rem; color: var(--text-dim); font-style: italic; }
+
+/* --- HOME COURSES SECTION --- */
+.home-courses-section { background: var(--bg2); padding: 90px 0; }
+.home-courses-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.courses-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
+.hc-card {
+  padding: 28px; border-radius: var(--radius-lg);
+  background: var(--glass); border: 1px solid var(--border-dim);
+  backdrop-filter: blur(12px);
+  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  position: relative; overflow: hidden;
+}
+.hc-card:hover { transform: translateY(-6px); box-shadow: var(--shadow), 0 0 28px var(--teal-glow); border-color: var(--border); }
+.hc-card.course-featured { border-color: rgba(0,245,212,0.3); box-shadow: 0 0 0 1px rgba(0,245,212,0.15), var(--shadow); }
+.featured-badge {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 100px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal)); color: #000;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.course-level { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--teal); margin-bottom: 10px; }
+.course-icon { font-size: 2rem; margin-bottom: 12px; }
+.hc-card h3 { font-family: var(--font-display); font-size: 1.1rem; font-weight: 700; margin-bottom: 10px; color: var(--text); }
+.hc-card p { font-size: 0.88rem; color: var(--text-dim); line-height: 1.65; margin-bottom: 16px; }
+.course-topics { margin-bottom: 20px; }
+.course-topics li { font-size: 0.83rem; color: var(--text-dim); padding: 5px 0; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 8px; }
+.course-topics li::before { content: '›'; color: var(--teal); font-weight: 700; }
+.course-footer { display: flex; justify-content: space-between; align-items: center; }
+.course-lessons { font-size: 0.8rem; color: var(--text-dim); }
+.course-tag { font-size: 0.7rem; font-weight: 700; padding: 3px 10px; border-radius: 6px; background: var(--teal-faint); color: var(--teal); border: 1px solid var(--border); }
+.course-tag.advanced { background: rgba(128,0,255,0.1); color: #b06bff; border-color: rgba(176,107,255,0.2); }
+.course-tag.institutional { background: rgba(255,215,0,0.08); color: var(--gold); border-color: rgba(255,215,0,0.2); }
+
+/* --- HOME PERFORMANCE SECTION --- */
+.home-perf-section { padding: 90px 0; }
+.home-perf-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.perf-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 48px; }
+.perf-stat {
+  padding: 28px; border-radius: var(--radius-lg); text-align: center;
+  background: var(--glass); border: 1px solid var(--border-dim); backdrop-filter: blur(12px);
+  transition: transform var(--transition), box-shadow var(--transition);
+  position: relative;
+}
+.perf-stat:hover { transform: translateY(-4px); box-shadow: var(--shadow), 0 0 24px var(--teal-glow); }
+.perf-icon { font-size: 1.8rem; margin-bottom: 12px; }
+.counter { font-family: var(--font-display); font-size: 3rem; font-weight: 800; color: var(--teal); text-shadow: 0 0 20px var(--teal-glow); line-height: 1; }
+.perf-unit { font-size: 1.2rem; font-weight: 700; color: var(--teal); display: inline-block; }
+.perf-stat p { font-size: 0.9rem; color: var(--text-dim); margin-top: 8px; line-height: 1.5; }
+.perf-stat p small { font-size: 0.78rem; color: rgba(138,155,176,0.7); }
+.weekly-perf { background: var(--bg-card); border: 1px solid var(--border-dim); border-radius: var(--radius-lg); padding: 28px; }
+.weekly-perf h3 { font-family: var(--font-display); font-size: 1rem; font-weight: 700; margin-bottom: 24px; color: var(--text-dim); }
+.week-bars { display: flex; align-items: flex-end; gap: 12px; height: 100px; }
+.week-bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.week-bar { width: 100%; border-radius: 6px 6px 0 0; transition: height 1.2s ease; height: 0px; }
+.week-bar.positive { background: linear-gradient(180deg, var(--teal), var(--teal-dim)); box-shadow: 0 -4px 12px var(--teal-glow); }
+.week-bar.negative { background: linear-gradient(180deg, var(--red), rgba(255,23,68,0.5)); }
+.week-label { font-size: 0.72rem; color: var(--text-dim); }
+.week-val { font-size: 0.72rem; font-weight: 700; color: var(--teal); }
+
+/* --- HOME TESTIMONIALS SECTION --- */
+.home-testimonials-section { background: var(--bg2); padding: 90px 0; }
+.home-testimonials-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.testimonial-carousel { position: relative; overflow: hidden; }
+.testimonials-track { display: flex; transition: transform 0.5s cubic-bezier(0.4,0,0.2,1); }
+.testimonial-slide { min-width: 100%; display: grid; grid-template-columns: 1fr 1fr; gap: 24px; padding: 4px; }
+.t-card {
+  padding: 28px; border-radius: var(--radius-lg);
+  border: 1px solid var(--border-dim); background: var(--bg-card);
+  backdrop-filter: blur(12px); transition: transform var(--transition);
+}
+.t-card:hover { transform: translateY(-4px); }
+.t-stars { color: var(--gold); font-size: 1rem; margin-bottom: 12px; letter-spacing: 2px; }
+.t-text { font-size: 0.92rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 18px; font-style: italic; }
+.t-footer { display: flex; justify-content: space-between; align-items: center; }
+.t-name { font-weight: 700; font-size: 0.9rem; }
+.t-verified { font-size: 0.72rem; color: var(--teal); font-weight: 600; }
+.t-profit { padding: 8px 14px; background: rgba(0,230,118,0.1); border: 1px solid rgba(0,230,118,0.2); border-radius: 8px; font-family: var(--font-display); font-size: 0.9rem; font-weight: 700; color: var(--green); }
+.carousel-controls { display: flex; align-items: center; justify-content: center; gap: 16px; margin-top: 32px; }
+.carousel-btn {
+  width: 44px; height: 44px; border-radius: 50%;
+  background: var(--bg-card); border: 1px solid var(--border-dim); color: var(--text);
+  font-size: 1.1rem; cursor: pointer; transition: all var(--transition);
+  display: flex; align-items: center; justify-content: center;
+}
+.carousel-btn:hover { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 12px var(--teal-glow); }
+.carousel-dots { display: flex; gap: 8px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; background: var(--border-dim); cursor: pointer; transition: all var(--transition); }
+.dot.active { background: var(--teal); box-shadow: 0 0 8px var(--teal-glow); width: 24px; border-radius: 4px; }
+
+/* --- HOME PRICING SECTION --- */
+.home-pricing-section { padding: 90px 0; }
+.home-pricing-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.pricing-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; align-items: start; }
+.pricing-card {
+  padding: 36px 28px; border-radius: var(--radius-lg);
+  background: var(--glass); border: 1px solid var(--border-dim);
+  backdrop-filter: blur(12px);
+  position: relative; overflow: hidden;
+  transition: transform var(--transition), box-shadow var(--transition);
+}
+.pricing-card:hover { transform: translateY(-6px); }
+.pricing-card.pricing-featured { border-color: rgba(0,245,212,0.3); transform: scale(1.04); box-shadow: var(--shadow), 0 0 40px var(--teal-glow); }
+.pricing-card.pricing-featured:hover { transform: scale(1.04) translateY(-6px); }
+.pricing-card.pricing-vip { border-color: rgba(255,215,0,0.25); }
+.pricing-glow { position: absolute; top: -40px; right: -40px; width: 150px; height: 150px; background: radial-gradient(circle, var(--teal-glow), transparent 70%); pointer-events: none; }
+.vip-glow { background: radial-gradient(circle, rgba(255,215,0,0.2), transparent 70%); }
+.pricing-badge {
+  position: absolute; top: 16px; right: 16px;
+  font-size: 0.7rem; font-weight: 700; padding: 4px 10px; border-radius: 100px;
+  background: linear-gradient(135deg, var(--teal-dim), var(--teal)); color: #000;
+  text-transform: uppercase; letter-spacing: 1px;
+}
+.vip-badge { background: linear-gradient(135deg, #c79a00, var(--gold)); }
+.pricing-tier { font-size: 0.8rem; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; color: var(--text-dim); margin-bottom: 12px; }
+.pricing-price { display: flex; align-items: baseline; gap: 4px; margin-bottom: 28px; }
+.price-currency { font-size: 1.4rem; font-weight: 700; color: var(--text-dim); align-self: flex-start; margin-top: 8px; }
+.price-amount { font-family: var(--font-display); font-size: 3.2rem; font-weight: 800; color: var(--text); line-height: 1; }
+.price-period { font-size: 0.9rem; color: var(--text-dim); }
+.pricing-card.pricing-featured .price-amount { color: var(--teal); text-shadow: 0 0 20px var(--teal-glow); }
+.pricing-card.pricing-vip .price-amount { color: var(--gold); text-shadow: 0 0 20px rgba(255,215,0,0.3); }
+.pricing-features { margin-bottom: 28px; }
+.pricing-features li { padding: 8px 0; font-size: 0.88rem; border-bottom: 1px solid var(--border-dim); display: flex; align-items: center; gap: 8px; }
+.pricing-features li.has { color: var(--text); }
+.pricing-features li.no { color: rgba(138,155,176,0.4); }
+
+/* --- HOME CONTACT CTA SECTION --- */
+.home-contact-section { background: var(--bg2); padding: 90px 0; }
+.home-contact-section .container { max-width: 1280px; margin: 0 auto; padding: 0 5%; }
+.contact-wrap {
+  padding: 60px; border-radius: var(--radius-lg);
+  background: var(--glass); border: 1px solid var(--border);
+  backdrop-filter: blur(20px);
+  display: grid; grid-template-columns: 1fr 1fr; gap: 60px; align-items: start;
+}
+.contact-left .section-title { font-size: 2rem; margin-bottom: 14px; }
+.contact-left p { font-size: 0.95rem; color: var(--text-dim); line-height: 1.7; margin-bottom: 28px; }
+.contact-socials { display: flex; flex-direction: column; gap: 12px; }
+.social-link-item {
+  display: flex; align-items: center; gap: 10px; padding: 12px 18px;
+  border-radius: var(--radius); border: 1px solid var(--border-dim);
+  font-size: 0.88rem; font-weight: 600; transition: all var(--transition); text-decoration: none;
+}
+.social-link-item.telegram { color: #2ba3d6; }
+.social-link-item.instagram { color: #e4405f; }
+.social-link-item.youtube { color: #ff0000; }
+.social-link-item:hover { background: var(--teal-faint); border-color: var(--border); transform: translateX(4px); }
+.contact-form-inner { display: flex; flex-direction: column; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group label { font-size: 0.82rem; font-weight: 600; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+.form-group input, .form-group select, .form-group textarea {
+  background: rgba(255,255,255,0.04); border: 1px solid var(--border-dim);
+  border-radius: var(--radius); padding: 13px 16px; color: var(--text); font-size: 0.95rem; font-family: var(--font);
+  transition: border-color var(--transition), box-shadow var(--transition); resize: vertical; outline: none;
+}
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus {
+  border-color: var(--teal); box-shadow: 0 0 0 3px var(--teal-glow);
+}
+.form-group select option { background: var(--bg2); }
+.form-submit { width: 100%; justify-content: center; font-size: 1rem; }
+
+/* ============================================================
+   PAGE 2 — COURSES
+   ============================================================ */
+.course-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px,1fr)); gap: 24px; }
+.course-card {
+  padding: 30px; border-radius: var(--radius); background: var(--glass);
+  border: 1px solid var(--glass-b); backdrop-filter: blur(16px);
+  position: relative; overflow: hidden; transition: transform 0.3s, box-shadow 0.3s;
+}
+.course-card::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 3px; background: linear-gradient(90deg, var(--teal-dim), var(--teal)); }
+.course-card:hover { transform: translateY(-6px); box-shadow: 0 20px 60px rgba(0,245,212,0.1); }
+.course-badge { display: inline-block; padding: 4px 12px; border-radius: 99px; font-size: 0.7rem; letter-spacing: 2px; font-weight: 700; text-transform: uppercase; margin-bottom: 16px; }
+.badge-beginner { background: rgba(0,230,118,0.12); color: #00e676; border: 1px solid rgba(0,230,118,0.3); }
+.badge-intermediate { background: rgba(255,214,0,0.12); color: #ffd600; border: 1px solid rgba(255,214,0,0.3); }
+.badge-advanced { background: rgba(255,82,82,0.12); color: #ff5252; border: 1px solid rgba(255,82,82,0.3); }
+.badge-pro { background: rgba(0,245,212,0.12); color: var(--teal); border: 1px solid rgba(0,245,212,0.3); }
+.course-card h3 { font-size: 1.15rem; margin-bottom: 10px; }
+.course-card p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 18px; }
+.course-modules { list-style: none; margin-bottom: 22px; }
+.course-modules li { font-size: 0.82rem; color: var(--silver-dim); padding: 5px 0; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; align-items: center; gap: 8px; }
+.course-modules li::before { content: '▸'; color: var(--teal); font-size: 0.7rem; }
+.course-price { font-size: 1.5rem; font-weight: 800; color: var(--teal); }
+.course-price span { font-size: 0.85rem; color: var(--text-dim); font-weight: 400; }
+.stm-banner { margin: 60px 5%; padding: 48px 40px; border-radius: 20px; background: linear-gradient(135deg, rgba(0,245,212,0.06) 0%, rgba(14,14,22,0.9) 100%); border: 1px solid rgba(0,245,212,0.25); display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; position: relative; overflow: hidden; }
+.stm-banner::before { content: 'STM'; position: absolute; right: -20px; top: -20px; font-size: 10rem; font-weight: 900; color: rgba(0,245,212,0.04); line-height: 1; pointer-events: none; }
+
+/* ============================================================
+   PAGE 3 — SIGNALS
+   ============================================================ */
+.signals-hero { background: linear-gradient(135deg, rgba(0,245,212,0.05) 0%, transparent 60%); padding: 70px 5% 40px; position: relative; }
+.winrate-display { text-align: center; padding: 50px 20px; }
+.wr-ring-wrap { position: relative; width: 200px; height: 200px; margin: 0 auto 24px; }
+.wr-ring-wrap svg { width: 200px; height: 200px; transform: rotate(-90deg); }
+.wr-ring-bg { fill: none; stroke: rgba(255,255,255,0.06); stroke-width: 12; }
+.wr-ring-bar { fill: none; stroke: var(--teal); stroke-width: 12; stroke-linecap: round; stroke-dasharray: 565; stroke-dashoffset: 565; transition: stroke-dashoffset 2s cubic-bezier(.25,.46,.45,.94); filter: drop-shadow(0 0 8px var(--teal)); }
+.wr-num { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; font-size: 2.6rem; font-weight: 900; color: var(--teal); line-height: 1; }
+.wr-num small { font-size: 0.75rem; color: var(--text-dim); font-weight: 400; }
+.perf-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px,1fr)); gap: 16px; margin-top: 40px; }
+.perf-card { padding: 22px; border-radius: var(--radius); background: var(--glass); border: 1px solid var(--glass-b); }
+.perf-pair { font-weight: 700; font-size: 1rem; margin-bottom: 10px; }
+.perf-bar-wrap { height: 6px; background: rgba(255,255,255,0.06); border-radius: 99px; overflow: hidden; margin: 8px 0; }
+.perf-bar { height: 100%; background: linear-gradient(90deg, var(--teal-dim), var(--teal)); border-radius: 99px; transition: width 1.5s ease; box-shadow: 0 0 10px var(--teal-glow); }
+.perf-nums { display: flex; justify-content: space-between; font-size: 0.78rem; color: var(--text-dim); }
+.perf-nums .win { color: #00e676; font-weight: 600; }
+
+/* ============================================================
+   PAGE 4 — MENTORSHIP
+   ============================================================ */
+.tier-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 24px; }
+.tier-card { padding: 36px 28px; border-radius: 18px; background: var(--glass); border: 1px solid var(--glass-b); backdrop-filter: blur(16px); position: relative; overflow: hidden; transition: all 0.3s; }
+.tier-card.featured { border-color: var(--teal); box-shadow: 0 0 40px rgba(0,245,212,0.12); }
+.tier-card.featured::after { content: 'MOST POPULAR'; position: absolute; top: 16px; right: -28px; background: var(--teal); color: #000; font-size: 0.65rem; font-weight: 800; letter-spacing: 2px; padding: 5px 36px; transform: rotate(45deg); }
+.tier-name { font-size: 0.75rem; letter-spacing: 3px; text-transform: uppercase; color: var(--teal); margin-bottom: 12px; }
+.tier-price { font-size: 2.4rem; font-weight: 900; margin-bottom: 4px; }
+.tier-price sub { font-size: 1.2rem; font-weight: 400; color: var(--text-dim); }
+.tier-price span { font-size: 0.85rem; color: var(--text-dim); font-weight: 400; }
+.tier-features { list-style: none; margin: 20px 0 28px; }
+.tier-features li { padding: 8px 0; font-size: 0.85rem; border-bottom: 1px solid rgba(255,255,255,0.04); display: flex; gap: 10px; align-items: flex-start; color: var(--silver-dim); }
+.tier-features li::before { content: '✦'; color: var(--teal); font-size: 0.6rem; margin-top: 3px; }
+.booking-form { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+.form-group { display: flex; flex-direction: column; gap: 8px; }
+.form-group.full { grid-column: 1/-1; }
+.form-group label { font-size: 0.78rem; letter-spacing: 1px; color: var(--silver-dim); text-transform: uppercase; }
+.form-group input, .form-group select, .form-group textarea { background: rgba(255,255,255,0.04); border: 1px solid rgba(0,245,212,0.15); border-radius: 8px; padding: 12px 16px; color: var(--text); font-size: 0.9rem; font-family: var(--font); outline: none; transition: border-color 0.25s, box-shadow 0.25s; }
+.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--teal); box-shadow: 0 0 20px rgba(0,245,212,0.12); }
+.form-group select option { background: var(--bg2); }
+.form-group textarea { resize: vertical; min-height: 110px; }
+
+/* ============================================================
+   PAGE 5 — STM HACKS
+   ============================================================ */
+.indicator-hero { text-align: center; padding: 80px 5% 60px; position: relative; }
+.indicator-mockup { width: 100%; max-width: 760px; margin: 0 auto 60px; border-radius: 18px; border: 1px solid rgba(0,245,212,0.2); overflow: hidden; box-shadow: 0 30px 100px rgba(0,245,212,0.1); }
+.chart-sim { background: #0d1117; height: 320px; position: relative; overflow: hidden; }
+.chart-sim canvas { display: block; width: 100%; height: 100%; }
+.feature-cards { display: grid; grid-template-columns: repeat(auto-fill,minmax(240px,1fr)); gap: 18px; }
+.feat-card { padding: 28px 22px; border-radius: var(--radius); background: var(--bg2); border: 1px solid rgba(0,245,212,0.12); transition: all 0.3s; }
+.feat-card:hover { border-color: var(--teal); box-shadow: 0 0 30px rgba(0,245,212,0.08); transform: translateY(-4px); }
+.feat-icon { width: 48px; height: 48px; background: rgba(0,245,212,0.1); border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 1.4rem; margin-bottom: 16px; }
+.feat-card h4 { font-size: 1rem; margin-bottom: 8px; }
+.feat-card p { font-size: 0.83rem; color: var(--text-dim); line-height: 1.6; }
+
+/* ============================================================
+   PAGE 6 — AUDIO BOOK
+   ============================================================ */
+.audio-bg { position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(0,245,212,0.06) 0%, transparent 70%); pointer-events: none; }
+.player-wrap { max-width: 600px; margin: 0 auto; padding: 40px; border-radius: 24px; background: rgba(255,255,255,0.03); border: 1px solid rgba(0,245,212,0.18); backdrop-filter: blur(24px); }
+.player-cover { width: 100%; aspect-ratio: 1; border-radius: 16px; background: linear-gradient(135deg, #0d1117 0%, rgba(0,245,212,0.1) 100%); display: flex; align-items: center; justify-content: center; margin-bottom: 28px; border: 1px solid rgba(0,245,212,0.12); position: relative; overflow: hidden; }
+.cover-art { font-size: 6rem; filter: drop-shadow(0 0 30px var(--teal-glow)); }
+.soundwave { position: absolute; bottom: 0; left: 0; right: 0; height: 60px; display: flex; align-items: flex-end; justify-content: center; gap: 3px; padding: 0 20px; }
+.wave-bar { width: 4px; background: var(--teal); border-radius: 2px; opacity: 0.5; animation: waveAnim var(--d,0.8s) ease-in-out infinite alternate; }
+@keyframes waveAnim { from { height: 4px; } to { height: var(--h,40px); } }
+.track-info { text-align: center; margin-bottom: 20px; }
+.track-title { font-size: 1.2rem; font-weight: 700; margin-bottom: 4px; }
+.track-author { font-size: 0.85rem; color: var(--text-dim); }
+.progress-wrap { margin-bottom: 20px; }
+.progress-bar { height: 4px; background: rgba(255,255,255,0.08); border-radius: 99px; position: relative; cursor: pointer; }
+.progress-fill { height: 100%; background: linear-gradient(90deg, var(--teal-dim), var(--teal)); border-radius: 99px; width: 35%; box-shadow: 0 0 12px var(--teal-glow); position: relative; }
+.progress-fill::after { content: ''; position: absolute; right: -6px; top: -4px; width: 12px; height: 12px; background: var(--teal); border-radius: 50%; box-shadow: 0 0 12px var(--teal); }
+.progress-times { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-dim); margin-top: 8px; }
+.player-controls { display: flex; align-items: center; justify-content: center; gap: 20px; }
+.ctrl-btn { background: none; border: none; color: var(--silver-dim); font-size: 1.3rem; cursor: pointer; transition: color 0.2s; display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; }
+.ctrl-btn:hover { color: var(--teal); }
+.ctrl-play { width: 56px; height: 56px; background: var(--teal); border-radius: 50%; border: none; color: #000; font-size: 1.4rem; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: all 0.2s; box-shadow: 0 0 30px rgba(0,245,212,0.35); }
+.ctrl-play:hover { transform: scale(1.08); }
+.tracklist { margin-top: 32px; display: flex; flex-direction: column; gap: 8px; }
+.track-item { display: flex; align-items: center; gap: 14px; padding: 12px 16px; border-radius: 10px; cursor: pointer; transition: all 0.2s; border: 1px solid transparent; }
+.track-item:hover { background: rgba(0,245,212,0.05); border-color: rgba(0,245,212,0.15); }
+.track-item.playing { background: rgba(0,245,212,0.08); border-color: rgba(0,245,212,0.25); }
+.track-num { width: 20px; font-size: 0.8rem; color: var(--text-dim); text-align: center; }
+.track-item.playing .track-num { color: var(--teal); }
+.track-name { flex: 1; font-size: 0.9rem; }
+.track-dur { font-size: 0.78rem; color: var(--text-dim); }
+
+/* ============================================================
+   PAGE 7 — BLOGS
+   ============================================================ */
+.blog-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px,1fr)); gap: 24px; }
+.blog-card { border-radius: var(--radius); background: var(--glass); border: 1px solid var(--glass-b); overflow: hidden; transition: transform 0.3s, box-shadow 0.3s; cursor: pointer; }
+.blog-card:hover { transform: translateY(-6px); box-shadow: 0 24px 60px rgba(0,245,212,0.08); }
+.blog-thumb { height: 180px; position: relative; overflow: hidden; display: flex; align-items: center; justify-content: center; font-size: 3.5rem; }
+.blog-body { padding: 24px; }
+.blog-cat { font-size: 0.7rem; letter-spacing: 2px; color: var(--teal); text-transform: uppercase; margin-bottom: 8px; }
+.blog-card h3 { font-size: 1.05rem; margin-bottom: 10px; line-height: 1.4; }
+.blog-card p { font-size: 0.83rem; color: var(--text-dim); line-height: 1.6; margin-bottom: 16px; }
+.blog-meta { display: flex; gap: 12px; align-items: center; font-size: 0.75rem; color: var(--text-dim); }
+.blog-meta span { display: flex; align-items: center; gap: 4px; }
+.bt-1 { background: linear-gradient(135deg,#0d1117,#001a2e); }
+.bt-2 { background: linear-gradient(135deg,#0d1117,#1a0d00); }
+.bt-3 { background: linear-gradient(135deg,#0d1117,#0d1a0d); }
+.bt-4 { background: linear-gradient(135deg,#0d1117,#1a001a); }
+.bt-5 { background: linear-gradient(135deg,#0d1117,#001a1a); }
+.bt-6 { background: linear-gradient(135deg,#0d1117,#1a1a00); }
+
+/* ============================================================
+   PAGE 8 — CONTACT
+   ============================================================ */
+.contact-grid { display: grid; grid-template-columns: 1fr 1.4fr; gap: 50px; align-items: start; }
+.contact-info { display: flex; flex-direction: column; gap: 24px; }
+.contact-info-item { display: flex; gap: 16px; padding: 20px; border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-b); }
+.ci-icon { width: 44px; height: 44px; flex-shrink: 0; background: rgba(0,245,212,0.1); border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; }
+.ci-text h4 { font-size: 0.85rem; margin-bottom: 4px; }
+.ci-text p { font-size: 0.83rem; color: var(--text-dim); }
+.contact-form-card { padding: 36px; border-radius: 18px; background: var(--glass); border: 1px solid var(--glass-b); backdrop-filter: blur(20px); }
+.contact-form-card h3 { margin-bottom: 24px; font-size: 1.3rem; }
+
+/* ============================================================
+   PAGE 9 — FAQS
+   ============================================================ */
+.faq-list { display: flex; flex-direction: column; gap: 12px; max-width: 820px; margin: 0 auto; }
+.faq-item { border-radius: 12px; background: var(--glass); border: 1px solid var(--glass-b); overflow: hidden; transition: border-color 0.3s; }
+.faq-item.open { border-color: var(--teal); }
+.faq-q { padding: 20px 24px; display: flex; justify-content: space-between; align-items: center; cursor: pointer; font-size: 0.95rem; font-weight: 600; gap: 16px; }
+.faq-icon { width: 28px; height: 28px; flex-shrink: 0; border-radius: 50%; border: 1.5px solid rgba(0,245,212,0.4); display: flex; align-items: center; justify-content: center; color: var(--teal); font-size: 1.1rem; transition: all 0.3s; }
+.faq-item.open .faq-icon { background: var(--teal); color: #000; transform: rotate(45deg); }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height 0.4s ease, padding 0.3s; }
+.faq-a-inner { padding: 0 24px 20px; font-size: 0.88rem; color: var(--text-dim); line-height: 1.75; border-top: 1px solid rgba(255,255,255,0.04); padding-top: 16px; }
+.faq-item.open .faq-a { max-height: 400px; }
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer { padding: 60px 5% 30px; border-top: 1px solid rgba(0,245,212,0.1); background: var(--bg2); }
+.footer-grid { display: grid; grid-template-columns: 1.5fr 1fr 1fr 1fr; gap: 40px; margin-bottom: 50px; }
+.footer-brand img { height: 48px; margin-bottom: 16px; }
+.footer-brand p { font-size: 0.85rem; color: var(--text-dim); line-height: 1.7; }
+.footer-col h5 { font-size: 0.75rem; letter-spacing: 2px; text-transform: uppercase; color: var(--teal); margin-bottom: 16px; }
+.footer-col a { display: block; color: var(--text-dim); text-decoration: none; font-size: 0.85rem; margin-bottom: 10px; transition: color 0.2s; cursor: pointer; }
+.footer-col a:hover { color: var(--teal); }
+.footer-bottom { display: flex; justify-content: space-between; align-items: center; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.05); font-size: 0.78rem; color: var(--text-dim); flex-wrap: wrap; gap: 12px; }
+.social-links { display: flex; gap: 12px; }
+.social-link { width: 36px; height: 36px; border-radius: 8px; border: 1px solid rgba(0,245,212,0.2); display: flex; align-items: center; justify-content: center; text-decoration: none; font-size: 1rem; transition: all 0.2s; color: var(--silver-dim); }
+.social-link:hover { border-color: var(--teal); color: var(--teal); box-shadow: 0 0 16px rgba(0,245,212,0.2); }
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast { position: fixed; bottom: 28px; right: 28px; z-index: 9999; padding: 14px 22px; background: var(--bg2); border: 1px solid var(--teal); border-radius: 10px; font-size: 0.87rem; color: var(--text); box-shadow: 0 8px 40px rgba(0,245,212,0.18); transform: translateY(100px); opacity: 0; transition: all 0.4s cubic-bezier(.25,.46,.45,.94); }
+.toast.show { transform: translateY(0); opacity: 1; }
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 1024px) {
+  .home-hero { grid-template-columns: 1fr; padding: 60px 5% 80px; text-align: center; }
+  .hero-content .hero-desc { margin: 0 auto 36px; }
+  .hero-stats { justify-content: center; }
+  .hero-ctas { justify-content: center; }
+  .hero-visual { display: none; }
+  .hero-scroll-hint { display: none; }
+  .pricing-grid { grid-template-columns: 1fr; }
+  .pricing-card.pricing-featured { transform: scale(1); }
+  .pricing-card.pricing-featured:hover { transform: translateY(-6px); }
+  .contact-wrap { grid-template-columns: 1fr; padding: 28px 20px; gap: 32px; }
+  .testimonial-slide { grid-template-columns: 1fr; }
+}
+@media (max-width: 900px) {
+  .nav-links, .nav-cta { display: none; }
+  .hamburger { display: flex; }
+  .contact-grid { grid-template-columns: 1fr; }
+  .footer-grid { grid-template-columns: 1fr 1fr; }
+  .booking-form { grid-template-columns: 1fr; }
+  .stm-banner { grid-template-columns: 1fr; }
+  .signals-grid { grid-template-columns: 1fr; }
+  .psych-grid { grid-template-columns: 1fr; }
+  .courses-grid { grid-template-columns: 1fr; }
+  .perf-stats { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .hero-title { font-size: 2.4rem; }
+  .footer-grid { grid-template-columns: 1fr; }
+  .tier-grid { grid-template-columns: 1fr; }
+  .blog-grid { grid-template-columns: 1fr; }
+  .perf-stats { grid-template-columns: 1fr 1fr; }
+  .hero-stats { flex-direction: column; gap: 12px; }
+  .hero-stat-divider { display: none; }
+}
+</style>
+</head>
+<body>
+
+<!-- CURSOR -->
+<div id="cursor-dot"></div>
+<div id="cursor-ring"></div>
+
+<!-- SCROLL PROGRESS -->
+<div id="scroll-progress"></div>
+
+<!-- LOADER -->
+<div id="loader">
+  <img id="loader-logo" src="logo.png" alt="10FX Trading Academy" onerror="this.style.display='none';document.getElementById('loader-logo-fallback').style.display='flex'">
+  <div id="loader-logo-fallback" style="display:none;flex-direction:column;align-items:center;gap:0">
+    <div style="font-size:3.5rem;font-weight:900;background:linear-gradient(135deg,#c0c8d8,#00f5d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:-2px">10FX</div>
+    <div style="font-size:0.65rem;letter-spacing:5px;color:#00c4a8;text-transform:uppercase">Trading Academy</div>
+  </div>
+  <div class="loader-bar-wrap"><div class="loader-bar"></div></div>
+  <div class="loader-text">Initializing Markets...</div>
+</div>
+
+<!-- TICKER -->
+<div id="ticker">
+  <div class="ticker-track" id="tickerTrack"></div>
+</div>
+
+<!-- NAVBAR -->
+<nav id="navbar">
+  <img src="logo.png" class="nav-logo" alt="10FX" onclick="navigate('home')"
+       onerror="this.outerHTML='<div onclick=navigate(\'home\') style=\'height:44px;display:flex;align-items:center;gap:6px;cursor:pointer\'><span style=\'font-size:1.6rem;font-weight:900;background:linear-gradient(135deg,#c0c8d8,#00f5d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text\'>10FX</span><span style=\'font-size:0.6rem;letter-spacing:3px;color:#00c4a8\'>TRADING ACADEMY</span></div>'">
+  <ul class="nav-links">
+    <li><a onclick="navigate('home')" class="active" id="nav-home">Home</a></li>
+    <li><a onclick="navigate('courses')" id="nav-courses">Courses</a></li>
+    <li><a onclick="navigate('signals')" id="nav-signals">Signals</a></li>
+    <li><a onclick="navigate('mentorship')" id="nav-mentorship">Mentorship</a></li>
+    <li><a onclick="navigate('indicator')" id="nav-indicator">STM Hacks</a></li>
+    <li><a onclick="navigate('audiobook')" id="nav-audiobook">Audio Book</a></li>
+    <li><a onclick="navigate('blogs')" id="nav-blogs">Blog</a></li>
+    <li><a onclick="navigate('contact')" id="nav-contact">Contact</a></li>
+    <li><a onclick="navigate('faqs')" id="nav-faqs">FAQs</a></li>
+  </ul>
+  <a class="nav-cta" onclick="navigate('courses')">Get Started</a>
+  <div class="hamburger" onclick="toggleMenu()" id="hamburger">
+    <span></span><span></span><span></span>
+  </div>
+</nav>
+
+<!-- MOBILE MENU -->
+<div class="mobile-menu" id="mobileMenu">
+  <a onclick="navigate('home');toggleMenu()">🏠 Home</a>
+  <a onclick="navigate('courses');toggleMenu()">📚 Courses</a>
+  <a onclick="navigate('signals');toggleMenu()">📡 Signal Group</a>
+  <a onclick="navigate('mentorship');toggleMenu()">🎯 Mentorship</a>
+  <a onclick="navigate('indicator');toggleMenu()">⚡ STM Hacks</a>
+  <a onclick="navigate('audiobook');toggleMenu()">🎧 Audio Book</a>
+  <a onclick="navigate('blogs');toggleMenu()">📰 Blogs</a>
+  <a onclick="navigate('contact');toggleMenu()">📬 Contact</a>
+  <a onclick="navigate('faqs');toggleMenu()">❓ FAQs</a>
+</div>
+
+<!-- APP -->
+<div id="app">
+
+<!-- ============================================================ -->
+<!-- PAGE: HOME (UPDATED) -->
+<!-- ============================================================ -->
+<div class="page active" id="page-home">
+
+  <!-- HERO -->
+  <section class="home-hero" id="home-hero">
+    <canvas class="hero-canvas" id="heroCanvas"></canvas>
+    <div class="hero-particles" id="heroParticles"></div>
+    <div class="hero-grid-bg"></div>
+
+    <div class="hero-content reveal">
+      <div class="hero-badge">
+        <span class="badge-dot"></span> Live Signals Active
+      </div>
+      <h1 class="hero-title">
+        Master Forex Trading<br>
+        <span class="gradient-text">with 10FX</span>
+      </h1>
+      <p class="hero-sub">Signals &bull; Psychology &bull; Smart Money Concepts</p>
+      <p class="hero-desc">
+        Join thousands of traders who transformed their financial journey through
+        professional mentorship, real-time signals, and elite trading education.
+      </p>
+      <div class="hero-ctas">
+        <a class="btn-primary" onclick="navigate('courses')">
+          <span>Join Now</span>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+        </a>
+        <a class="btn-secondary" onclick="navigate('signals')">
+          <span>View Signals</span>
+        </a>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <strong>5,000+</strong><span>Active Students</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <strong>87%</strong><span>Win Rate</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <strong>340R+</strong><span>Total Gained</span>
+        </div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat">
+          <strong>4 Yrs</strong><span>of Excellence</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-visual">
+      <div class="chart-card glass">
+        <div class="chart-card-header">
+          <span class="pair-tag">XAUUSD</span>
+          <span class="win-tag">+2.4R ✓</span>
+        </div>
+        <canvas id="miniChartCanvas" width="280" height="120"></canvas>
+        <div class="chart-card-footer">
+          <span>Entry: 2318.50</span>
+          <span class="green">TP Hit ✓</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="hero-scroll-hint">
+      <div class="scroll-mouse"></div>
+      <span>Scroll to explore</span>
+    </div>
+  </section>
+
+  <!-- HOME TICKER BAR -->
+  <div class="home-ticker-wrap">
+    <div class="home-ticker-track" id="homeTicker"></div>
+  </div>
+
+  <!-- SIGNALS SECTION -->
+  <section class="home-signals-section">
+    <div class="container">
+      <div class="section-tag reveal">📡 Live Signals</div>
+      <h2 class="section-title reveal">Real-Time Market <span class="gradient-text">Intelligence</span></h2>
+      <p class="section-sub reveal">Our signals are backed by Smart Money Concepts, institutional order flow analysis, and precision entries — delivered straight to your device.</p>
+      <div class="signals-grid" id="signalsGrid"></div>
+      <div class="signals-cta reveal">
+        <a class="btn-primary" onclick="navigate('signals')">Access Live Signals →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PSYCHOLOGY SECTION -->
+  <section class="home-psych-section">
+    <div class="container">
+      <div class="section-tag reveal">🧠 Trading Mindset</div>
+      <h2 class="section-title reveal">The Psychology of a <span class="gradient-text">Winning Trader</span></h2>
+      <p class="section-sub reveal">The markets don't beat traders — their minds do. We build the mental framework that separates consistent professionals from emotional gamblers.</p>
+      <div class="psych-grid">
+        <div class="psych-card reveal">
+          <div class="psych-icon">🎯</div>
+          <h3>Discipline</h3>
+          <p>Execute your trading plan without deviation. Discipline is the bridge between strategy and consistent profitability.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="92"></div></div>
+          <span class="psych-metric">92% of pro traders cite discipline as #1 skill</span>
+        </div>
+        <div class="psych-card reveal">
+          <div class="psych-icon">⚖️</div>
+          <h3>Risk Management</h3>
+          <p>Never risk more than you can afford to lose. Protect capital first — profits are a byproduct of surviving the market long enough.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="98"></div></div>
+          <span class="psych-metric">1-2% risk per trade keeps you in the game</span>
+        </div>
+        <div class="psych-card reveal">
+          <div class="psych-icon">🧘</div>
+          <h3>Emotional Control</h3>
+          <p>Fear and greed are the enemies of profit. Learn to detach from outcomes and trade with cold, calculated precision.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="85"></div></div>
+          <span class="psych-metric">85% of losses are emotionally driven</span>
+        </div>
+        <div class="psych-card reveal">
+          <div class="psych-icon">📋</div>
+          <h3>Journal & Review</h3>
+          <p>The traders who review their mistakes and document every trade evolve the fastest. Your journal is your competitive edge.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="78"></div></div>
+          <span class="psych-metric">Journaling traders improve 3x faster</span>
+        </div>
+        <div class="psych-card reveal">
+          <div class="psych-icon">🔄</div>
+          <h3>Process Over Outcome</h3>
+          <p>Focus on executing the right process — not on winning individual trades. A good trade can lose; a bad trade can win. Trust the system.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="88"></div></div>
+          <span class="psych-metric">Process focus cuts tilt by 60%</span>
+        </div>
+        <div class="psych-card reveal">
+          <div class="psych-icon">🧠</div>
+          <h3>Growth Mindset</h3>
+          <p>Every loss is a lesson. The best traders in the world are still students of the market. Commit to continuous learning and adaptation.</p>
+          <div class="psych-meter"><div class="psych-meter-fill" data-width="95"></div></div>
+          <span class="psych-metric">Lifelong learners outperform by 40%</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- COURSES SECTION -->
+  <section class="home-courses-section">
+    <div class="container">
+      <div class="section-tag reveal">📚 Education</div>
+      <h2 class="section-title reveal">Elite <span class="gradient-text">Trading Curriculum</span></h2>
+      <p class="section-sub reveal">A structured, professional curriculum built from institutional concepts — the same knowledge used by banks and hedge funds, now accessible to retail traders.</p>
+      <div class="courses-grid">
+        <div class="hc-card reveal">
+          <div class="course-level">Foundational</div>
+          <div class="course-icon">📐</div>
+          <h3>Market Structure</h3>
+          <p>Understand how markets move: Higher Highs, Lower Lows, Break of Structure (BOS), Change of Character (CHoCH), and trend shifts.</p>
+          <ul class="course-topics">
+            <li>Bullish & Bearish Structure</li>
+            <li>Break of Structure (BOS)</li>
+            <li>Change of Character (CHoCH)</li>
+            <li>Internal vs External Structure</li>
+          </ul>
+          <div class="course-footer"><span class="course-lessons">12 Lessons</span><span class="course-tag">Beginner</span></div>
+        </div>
+        <div class="hc-card course-featured reveal">
+          <div class="featured-badge">Most Popular</div>
+          <div class="course-level">Advanced</div>
+          <div class="course-icon">💡</div>
+          <h3>Smart Money Concepts (SMC)</h3>
+          <p>The complete SMC framework — how institutional traders accumulate, manipulate, and distribute positions. Stop being the liquidity.</p>
+          <ul class="course-topics">
+            <li>Order Blocks & FVGs</li>
+            <li>Liquidity Grabs & Sweeps</li>
+            <li>Premium & Discount Zones</li>
+            <li>Institutional Order Flow</li>
+          </ul>
+          <div class="course-footer"><span class="course-lessons">28 Lessons</span><span class="course-tag advanced">Advanced</span></div>
+        </div>
+        <div class="hc-card reveal">
+          <div class="course-level">Institutional</div>
+          <div class="course-icon">🏛️</div>
+          <h3>ICT Concepts</h3>
+          <p>Inner Circle Trader methodology: killzones, dealing ranges, optimal trade entries, and the precision entry model used by elite traders.</p>
+          <ul class="course-topics">
+            <li>Killzones & Sessions</li>
+            <li>Optimal Trade Entry (OTE)</li>
+            <li>Dealing Range Models</li>
+            <li>Power of 3 (AMD)</li>
+          </ul>
+          <div class="course-footer"><span class="course-lessons">22 Lessons</span><span class="course-tag institutional">Institutional</span></div>
+        </div>
+        <div class="hc-card reveal">
+          <div class="course-level">Risk</div>
+          <div class="course-icon">🛡️</div>
+          <h3>Risk Management</h3>
+          <p>Position sizing, R-multiple systems, drawdown limits, and the mathematical edge that makes the difference between blowing accounts and compounding wealth.</p>
+          <ul class="course-topics">
+            <li>R-Multiple Framework</li>
+            <li>Position Sizing Formula</li>
+            <li>Drawdown Rules</li>
+            <li>Account Protection Protocol</li>
+          </ul>
+          <div class="course-footer"><span class="course-lessons">10 Lessons</span><span class="course-tag">Essential</span></div>
+        </div>
+      </div>
+      <div style="text-align:center;margin-top:40px">
+        <a class="btn-primary" onclick="navigate('courses')">View All Courses →</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- PERFORMANCE SECTION -->
+  <section class="home-perf-section">
+    <div class="container">
+      <div class="section-tag reveal">📊 Track Record</div>
+      <h2 class="section-title reveal">Verified <span class="gradient-text">Performance Stats</span></h2>
+      <p class="section-sub reveal">Transparency is our foundation. Every result is tracked, verified, and published — no cherry-picked trades.</p>
+      <div class="perf-stats">
+        <div class="perf-stat reveal">
+          <div class="perf-icon">📈</div>
+          <div><span class="counter" data-target="340">0</span><span class="perf-unit">R+</span></div>
+          <p>Total R Gained<br><small>Since January 2024</small></p>
+        </div>
+        <div class="perf-stat reveal">
+          <div class="perf-icon">🎯</div>
+          <div><span class="counter" data-target="87">0</span><span class="perf-unit">%</span></div>
+          <p>Win Rate<br><small>Last 90 Days</small></p>
+        </div>
+        <div class="perf-stat reveal">
+          <div class="perf-icon">📊</div>
+          <div><span class="counter" data-target="248">0</span></div>
+          <p>Signals Sent<br><small>This Year</small></p>
+        </div>
+        <div class="perf-stat reveal">
+          <div class="perf-icon">👥</div>
+          <div><span class="counter" data-target="5000">0</span><span class="perf-unit">+</span></div>
+          <p>Active Members<br><small>Across All Tiers</small></p>
+        </div>
+      </div>
+      <div class="weekly-perf reveal">
+        <h3>Weekly Performance — This Month</h3>
+        <div class="week-bars" id="weekBars"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS SECTION -->
+  <section class="home-testimonials-section">
+    <div class="container">
+      <div class="section-tag reveal">💬 Social Proof</div>
+      <h2 class="section-title reveal">What Our <span class="gradient-text">Members Say</span></h2>
+      <p class="section-sub reveal">Real traders. Real results. No paid actors, no fabricated screenshots.</p>
+      <div class="testimonial-carousel">
+        <div class="testimonials-track" id="testimonialsTrack"></div>
+        <div class="carousel-controls">
+          <button class="carousel-btn" id="prevBtn">&#8592;</button>
+          <div class="carousel-dots" id="carouselDots"></div>
+          <button class="carousel-btn" id="nextBtn">&#8594;</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- PRICING SECTION -->
+  <section class="home-pricing-section">
+    <div class="container">
+      <div class="section-tag reveal">💎 Membership</div>
+      <h2 class="section-title reveal">Choose Your <span class="gradient-text">Trading Path</span></h2>
+      <p class="section-sub reveal">Every tier is designed to deliver real value. Start where you are. Scale to where you want to be.</p>
+      <div class="pricing-grid">
+        <div class="pricing-card reveal">
+          <div class="pricing-tier">Basic</div>
+          <div class="pricing-price"><span class="price-currency">$</span><span class="price-amount">49</span><span class="price-period">/mo</span></div>
+          <ul class="pricing-features">
+            <li class="has">✓ Daily Market Analysis</li>
+            <li class="has">✓ 3 Signals per Week</li>
+            <li class="has">✓ Market Structure Course</li>
+            <li class="has">✓ Community Access</li>
+            <li class="no">✗ Live Signal Alerts</li>
+            <li class="no">✗ ICT & SMC Courses</li>
+            <li class="no">✗ 1-on-1 Mentorship</li>
+            <li class="no">✗ VIP Telegram Group</li>
+          </ul>
+          <a class="btn-outline" onclick="navigate('contact')">Get Started</a>
+        </div>
+        <div class="pricing-card pricing-featured reveal">
+          <div class="pricing-glow"></div>
+          <div class="pricing-badge">Most Popular</div>
+          <div class="pricing-tier">Pro</div>
+          <div class="pricing-price"><span class="price-currency">$</span><span class="price-amount">97</span><span class="price-period">/mo</span></div>
+          <ul class="pricing-features">
+            <li class="has">✓ Daily Market Analysis</li>
+            <li class="has">✓ Unlimited Signals</li>
+            <li class="has">✓ Full Course Library</li>
+            <li class="has">✓ Live Signal Alerts</li>
+            <li class="has">✓ ICT & SMC Courses</li>
+            <li class="has">✓ Pro Telegram Group</li>
+            <li class="no">✗ 1-on-1 Mentorship</li>
+            <li class="no">✗ Priority Support</li>
+          </ul>
+          <a class="btn-primary" style="display:block;text-align:center" onclick="navigate('contact')">Join Pro</a>
+        </div>
+        <div class="pricing-card pricing-vip reveal">
+          <div class="pricing-glow vip-glow"></div>
+          <div class="pricing-badge vip-badge">Elite</div>
+          <div class="pricing-tier">VIP</div>
+          <div class="pricing-price"><span class="price-currency">$</span><span class="price-amount">249</span><span class="price-period">/mo</span></div>
+          <ul class="pricing-features">
+            <li class="has">✓ Everything in Pro</li>
+            <li class="has">✓ 1-on-1 Mentorship</li>
+            <li class="has">✓ VIP Telegram Group</li>
+            <li class="has">✓ Live Trading Sessions</li>
+            <li class="has">✓ Prop Firm Prep Program</li>
+            <li class="has">✓ Portfolio Review</li>
+            <li class="has">✓ Priority Support 24/7</li>
+            <li class="has">✓ Private Mastermind</li>
+          </ul>
+          <a class="btn-vip" onclick="navigate('contact')">Join VIP</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- CONTACT CTA SECTION -->
+  <section class="home-contact-section">
+    <div class="container">
+      <div class="contact-wrap reveal">
+        <div class="contact-left">
+          <div class="section-tag">🚀 Get Started</div>
+          <h2 class="section-title">Join <span class="gradient-text">10FX Today</span></h2>
+          <p>Take the first step toward consistent, professional trading. Fill in your details and our team will reach out within 24 hours.</p>
+          <div class="contact-socials">
+            <a href="#" class="social-link-item telegram">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+              Join Telegram
+            </a>
+            <a href="#" class="social-link-item instagram">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 1 0 0 12.324 6.162 6.162 0 0 0 0-12.324zM12 16a4 4 0 1 1 0-8 4 4 0 0 1 0 8zm6.406-11.845a1.44 1.44 0 1 0 0 2.881 1.44 1.44 0 0 0 0-2.881z"/></svg>
+              Follow on Instagram
+            </a>
+            <a href="#" class="social-link-item youtube">
+              <svg viewBox="0 0 24 24" fill="currentColor" width="20" height="20"><path d="M23.499 6.203a3.008 3.008 0 0 0-2.089-2.089c-1.87-.501-9.4-.501-9.4-.501s-7.509 0-9.399.501A3.008 3.008 0 0 0 .522 6.203C0 8.057 0 12 0 12s0 3.943.522 5.797a3.008 3.008 0 0 0 2.089 2.089c1.89.501 9.4.501 9.4.501s7.508 0 9.399-.501a3.008 3.008 0 0 0 2.089-2.089C24 15.943 24 12 24 12s0-3.943-.501-5.797zM9.609 15.601V8.408l6.264 3.602-6.264 3.591z"/></svg>
+              Watch Free Content
+            </a>
+          </div>
+        </div>
+        <div class="contact-right">
+          <div class="contact-form-inner">
+            <div class="form-group">
+              <label>Full Name</label>
+              <input type="text" placeholder="Enter your full name">
+            </div>
+            <div class="form-group">
+              <label>Email Address</label>
+              <input type="email" placeholder="Enter your email">
+            </div>
+            <div class="form-group">
+              <label>Interested Plan</label>
+              <select>
+                <option value="">Select a plan...</option>
+                <option value="basic">Basic — $49/mo</option>
+                <option value="pro">Pro — $97/mo</option>
+                <option value="vip">VIP — $249/mo</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Message (Optional)</label>
+              <textarea rows="3" placeholder="Tell us about your trading goals..."></textarea>
+            </div>
+            <button class="btn-primary form-submit" onclick="showToast('Application submitted! We\'ll respond within 24hrs. 🚀')">
+              <span>Submit Application</span>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</div><!-- /page-home -->
+
+<!-- ============================================================ -->
+<!-- PAGE: COURSES -->
+<!-- ============================================================ -->
+<div class="page" id="page-courses">
+  <div class="section">
+    <div class="section-tag">📚 Curriculum</div>
+    <h2 class="section-title">World-Class Trading Education</h2>
+    <p class="section-sub">From foundational concepts to the proprietary STM Strategy 4.0 — every course is crafted for real market application.</p>
+    <div class="course-grid">
+      <div class="course-card reveal">
+        <span class="course-badge badge-beginner">Beginner</span>
+        <h3>Forex Foundations</h3>
+        <p>Everything you need to understand currency markets, how brokers work, and the mechanics of trading.</p>
+        <ul class="course-modules">
+          <li>What is Forex & Why Trade It</li>
+          <li>Currency Pairs & Pip Values</li>
+          <li>Lot Sizes & Leverage Explained</li>
+          <li>Platform Mastery (MT4/MT5)</li>
+          <li>Setting Up Your Trading Account</li>
+        </ul>
+        <div class="course-price">Free <span>/ Starter Module</span></div>
+        <a class="btn-neon" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Enroll Now</a>
+      </div>
+      <div class="course-card reveal">
+        <span class="course-badge badge-intermediate">Intermediate</span>
+        <h3>Technical Analysis Mastery</h3>
+        <p>Deep-dive into chart patterns, indicator confluences, and price action that drives professional decisions.</p>
+        <ul class="course-modules">
+          <li>Support & Resistance Mapping</li>
+          <li>Candlestick Pattern Encyclopedia</li>
+          <li>RSI, MACD & Bollinger Bands</li>
+          <li>Fibonacci & Elliott Wave</li>
+          <li>Multi-Timeframe Analysis</li>
+        </ul>
+        <div class="course-price">$149 <span>/ One-time</span></div>
+        <a class="btn-neon" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Enroll Now</a>
+      </div>
+      <div class="course-card reveal">
+        <span class="course-badge badge-advanced">Advanced</span>
+        <h3>Smart Money Concepts</h3>
+        <p>Learn how institutional traders move markets — order blocks, liquidity grabs, and ICT concepts.</p>
+        <ul class="course-modules">
+          <li>Market Structure & Break of Structure</li>
+          <li>Order Blocks & Fair Value Gaps</li>
+          <li>Liquidity Hunts & Stop Runs</li>
+          <li>Premium & Discount Zones</li>
+          <li>Institutional Entry Models</li>
+        </ul>
+        <div class="course-price">$249 <span>/ One-time</span></div>
+        <a class="btn-neon" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Enroll Now</a>
+      </div>
+      <div class="course-card reveal" style="border-color:var(--teal);box-shadow:0 0 40px rgba(0,245,212,0.1)">
+        <div style="position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--teal-dim),var(--teal),var(--silver))"></div>
+        <span class="course-badge badge-pro">Flagship</span>
+        <h3>STM Strategy 4.0 ⚡</h3>
+        <p>Our proprietary Sniper Trading Method — the complete system used by 10FX graduates to achieve consistent profitability.</p>
+        <ul class="course-modules">
+          <li>STM Entry & Exit Framework</li>
+          <li>STM HACKS Indicator Integration</li>
+          <li>Risk Management Formula</li>
+          <li>Trade Journal & Psychology</li>
+          <li>Live Trade Reviews (Weekly)</li>
+          <li>Lifetime Community Access</li>
+        </ul>
+        <div class="course-price">$449 <span>/ Lifetime Access</span></div>
+        <a class="btn-solid" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Get Flagship Access</a>
+      </div>
+      <div class="course-card reveal">
+        <span class="course-badge badge-intermediate">Psychology</span>
+        <h3>Trader's Mindset</h3>
+        <p>The hidden edge most traders ignore. Master emotion, discipline, and peak-performance psychology.</p>
+        <ul class="course-modules">
+          <li>Fear & Greed Management</li>
+          <li>Building a Trading Routine</li>
+          <li>Loss Recovery Protocols</li>
+          <li>Journaling for Growth</li>
+        </ul>
+        <div class="course-price">$99 <span>/ One-time</span></div>
+        <a class="btn-neon" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Enroll Now</a>
+      </div>
+      <div class="course-card reveal">
+        <span class="course-badge badge-advanced">Risk Mgmt</span>
+        <h3>Capital Preservation Pro</h3>
+        <p>Professional-grade risk management — position sizing, drawdown limits, and account scaling.</p>
+        <ul class="course-modules">
+          <li>Position Sizing Calculator</li>
+          <li>Max Drawdown Rules</li>
+          <li>Risk-to-Reward Optimisation</li>
+          <li>Scaling from Demo to Live</li>
+        </ul>
+        <div class="course-price">$179 <span>/ One-time</span></div>
+        <a class="btn-neon" style="margin-top:18px;width:100%;justify-content:center" onclick="navigate('contact')">Enroll Now</a>
+      </div>
+    </div>
+  </div>
+  <div class="stm-banner reveal">
+    <div>
+      <div class="section-tag">Proprietary System</div>
+      <h2 style="font-size:2rem;font-weight:800;margin-bottom:16px;background:linear-gradient(135deg,#fff,var(--teal));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text">STM Strategy 4.0</h2>
+      <p style="font-size:0.95rem;color:var(--text-dim);line-height:1.75;margin-bottom:28px">The Sniper Trading Method is a confluence-based trading system refined over 4 years of live market execution. Combining smart money concepts, proprietary indicators, and precision entries — STM 4.0 is the complete edge.</p>
+      <ul style="list-style:none;display:flex;flex-direction:column;gap:10px;margin-bottom:28px">
+        <li style="display:flex;gap:10px;align-items:center;font-size:0.88rem;color:var(--silver-dim)"><span style="color:var(--teal)">✦</span> Proven 87%+ historical win rate</li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:0.88rem;color:var(--silver-dim)"><span style="color:var(--teal)">✦</span> Works on all major & gold pairs</li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:0.88rem;color:var(--silver-dim)"><span style="color:var(--teal)">✦</span> Integrates with STM HACKS indicator</li>
+        <li style="display:flex;gap:10px;align-items:center;font-size:0.88rem;color:var(--silver-dim)"><span style="color:var(--teal)">✦</span> Applicable from 15m to Daily charts</li>
+      </ul>
+      <a class="btn-solid" onclick="navigate('indicator')">Explore STM HACKS →</a>
+    </div>
+    <div style="display:flex;align-items:center;justify-content:center">
+      <div style="text-align:center">
+        <div style="font-size:6rem;font-weight:900;background:linear-gradient(135deg,var(--teal),var(--silver));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;line-height:1">4.0</div>
+        <div style="font-size:0.8rem;letter-spacing:4px;color:var(--teal-dim);text-transform:uppercase">Latest Version</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: SIGNALS -->
+<!-- ============================================================ -->
+<div class="page" id="page-signals">
+  <div class="signals-hero">
+    <div class="grid-bg"></div>
+    <div class="section" style="padding-bottom:20px">
+      <div class="section-tag">📡 Live Performance</div>
+      <h2 class="section-title">Signal Group Dashboard</h2>
+      <p class="section-sub">Real results from real trades. Our signal group delivers institutional-quality setups direct to your device.</p>
+    </div>
+  </div>
+  <div class="section" style="padding-top:0">
+    <div style="display:grid;grid-template-columns:200px 1fr;gap:40px;align-items:start">
+      <div class="winrate-display glass" style="padding:30px 20px">
+        <div class="wr-ring-wrap">
+          <svg viewBox="0 0 200 200"><circle class="wr-ring-bg" cx="100" cy="100" r="90"/><circle class="wr-ring-bar" id="wrBar" cx="100" cy="100" r="90"/></svg>
+          <div class="wr-num" id="wrNum">0<small>%</small><br><span style="font-size:0.65rem;color:var(--text-dim)">Win Rate</span></div>
+        </div>
+        <div style="font-size:0.75rem;letter-spacing:1px;color:var(--text-dim);text-transform:uppercase">Monthly Avg</div>
+      </div>
+      <div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px">
+          <div class="glass" style="padding:20px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:var(--teal)" id="cntWin">0</div><div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-top:4px">Wins This Month</div></div>
+          <div class="glass" style="padding:20px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#ff5252" id="cntLoss">0</div><div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-top:4px">Losses</div></div>
+          <div class="glass" style="padding:20px;text-align:center"><div style="font-size:1.8rem;font-weight:800;color:#ffd600" id="cntPips">0</div><div style="font-size:0.75rem;color:var(--text-dim);letter-spacing:1px;margin-top:4px">Total Pips</div></div>
+        </div>
+        <div class="perf-grid">
+          <div class="perf-card reveal"><div class="perf-pair">XAU/USD (Gold)</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="92%"></div></div><div class="perf-nums"><span class="win">92%</span><span>23W / 2L</span></div></div>
+          <div class="perf-card reveal"><div class="perf-pair">EUR/USD</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="88%"></div></div><div class="perf-nums"><span class="win">88%</span><span>22W / 3L</span></div></div>
+          <div class="perf-card reveal"><div class="perf-pair">GBP/USD</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="85%"></div></div><div class="perf-nums"><span class="win">85%</span><span>17W / 3L</span></div></div>
+          <div class="perf-card reveal"><div class="perf-pair">USD/JPY</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="82%"></div></div><div class="perf-nums"><span class="win">82%</span><span>18W / 4L</span></div></div>
+          <div class="perf-card reveal"><div class="perf-pair">GBP/JPY</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="80%"></div></div><div class="perf-nums"><span class="win">80%</span><span>16W / 4L</span></div></div>
+          <div class="perf-card reveal"><div class="perf-pair">NAS100</div><div class="perf-bar-wrap"><div class="perf-bar" style="width:0%" data-w="78%"></div></div><div class="perf-nums"><span class="win">78%</span><span>14W / 4L</span></div></div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:60px;padding:40px;border-radius:20px;background:linear-gradient(135deg,rgba(0,245,212,0.06),rgba(14,14,22,0.9));border:1px solid rgba(0,245,212,0.2);text-align:center">
+      <div style="font-size:2.5rem;margin-bottom:12px">📲</div>
+      <h3 style="font-size:1.4rem;margin-bottom:10px">Join Our Premium Telegram Signal Group</h3>
+      <p style="color:var(--text-dim);font-size:0.9rem;max-width:520px;margin:0 auto 28px;line-height:1.7">Get real-time alerts, detailed analysis, and risk management levels straight to your phone. Join 5,000+ traders already profiting from our signals.</p>
+      <a class="btn-solid" href="#" onclick="showToast('Redirecting to Telegram...')">🚀 Join Telegram Group</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: MENTORSHIP -->
+<!-- ============================================================ -->
+<div class="page" id="page-mentorship">
+  <div style="position:relative;overflow:hidden">
+    <canvas id="particleCanvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none"></canvas>
+    <div class="section">
+      <div class="section-tag">🎯 Elite Coaching</div>
+      <h2 class="section-title">One-on-One Mentorship</h2>
+      <p class="section-sub">Personalised coaching tailored to your current level, goals, and trading schedule. Direct access to a professional trader.</p>
+      <div class="tier-grid">
+        <div class="tier-card reveal">
+          <div class="tier-name">Starter</div>
+          <div class="tier-price"><sub>$</sub>197 <span>/ month</span></div>
+          <ul class="tier-features">
+            <li>2 × 1-hour Zoom sessions/month</li><li>Personalised trade review</li><li>Email support (48hr response)</li><li>Access to beginner course library</li><li>Progress tracking dashboard</li>
+          </ul>
+          <a class="btn-neon" style="width:100%;justify-content:center" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Session</a>
+        </div>
+        <div class="tier-card featured reveal">
+          <div class="tier-name">Professional</div>
+          <div class="tier-price"><sub>$</sub>397 <span>/ month</span></div>
+          <ul class="tier-features">
+            <li>4 × 1-hour Zoom sessions/month</li><li>Weekly live trade-along</li><li>Priority WhatsApp support</li><li>Full course library access</li><li>STM Strategy 4.0 deep-dive</li><li>Custom trading plan</li><li>Monthly performance review</li>
+          </ul>
+          <a class="btn-solid" style="width:100%;justify-content:center" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Session</a>
+        </div>
+        <div class="tier-card reveal">
+          <div class="tier-name">Elite</div>
+          <div class="tier-price"><sub>$</sub>797 <span>/ month</span></div>
+          <ul class="tier-features">
+            <li>Unlimited Zoom sessions</li><li>Daily mentor check-ins</li><li>Direct phone/WhatsApp access</li><li>Prop firm challenge coaching</li><li>Portfolio review & fund mgmt prep</li><li>Priority signal alerts</li><li>Exclusive elite community</li><li>Recorded session library</li>
+          </ul>
+          <a class="btn-neon" style="width:100%;justify-content:center" onclick="document.getElementById('booking').scrollIntoView({behavior:'smooth'})">Book Session</a>
+        </div>
+      </div>
+      <div id="booking" style="margin-top:70px">
+        <div class="section-tag">📅 Schedule</div>
+        <h2 class="section-title">Book Your Session</h2>
+        <p class="section-sub">Fill in the form and we'll confirm your slot within 24 hours.</p>
+        <div class="glass" style="padding:40px;border-radius:20px;max-width:720px">
+          <div class="booking-form">
+            <div class="form-group"><label>First Name</label><input type="text" placeholder="John"></div>
+            <div class="form-group"><label>Last Name</label><input type="text" placeholder="Doe"></div>
+            <div class="form-group"><label>Email Address</label><input type="email" placeholder="john@example.com"></div>
+            <div class="form-group"><label>WhatsApp Number</label><input type="tel" placeholder="+1 234 567 8900"></div>
+            <div class="form-group"><label>Mentorship Tier</label><select><option>Starter — $197/mo</option><option>Professional — $397/mo</option><option>Elite — $797/mo</option></select></div>
+            <div class="form-group"><label>Preferred Session Time</label><input type="datetime-local"></div>
+            <div class="form-group full"><label>Trading Background & Goals</label><textarea placeholder="Tell us about your experience level and what you want to achieve..."></textarea></div>
+          </div>
+          <button class="btn-solid" style="margin-top:20px" onclick="showToast('Booking submitted! We\'ll confirm within 24hrs.')">Submit Booking Request</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: INDICATOR -->
+<!-- ============================================================ -->
+<div class="page" id="page-indicator">
+  <div class="indicator-hero">
+    <div class="grid-bg"></div>
+    <div style="position:relative;z-index:1">
+      <div class="section-tag">⚡ Proprietary Tool</div>
+      <h2 class="section-title">STM HACKS Indicator</h2>
+      <p class="section-sub" style="margin:0 auto 40px">The all-in-one MT4/MT5 indicator built around the STM Strategy 4.0 framework — your visual edge on every chart.</p>
+      <div class="indicator-mockup">
+        <div class="chart-sim"><canvas id="chartCanvas"></canvas></div>
+        <div style="padding:16px 20px;background:#0d1117;display:flex;gap:16px;flex-wrap:wrap;border-top:1px solid rgba(0,245,212,0.1)">
+          <span style="font-size:0.75rem;color:var(--teal);display:flex;align-items:center;gap:6px">⬆ BUY SIGNAL</span>
+          <span style="font-size:0.75rem;color:#ff5252;display:flex;align-items:center;gap:6px">⬇ SELL SIGNAL</span>
+          <span style="font-size:0.75rem;color:#ffd600;display:flex;align-items:center;gap:6px">◆ ORDER BLOCK</span>
+          <span style="font-size:0.75rem;color:var(--silver-dim);display:flex;align-items:center;gap:6px">— STM ZONE</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="section" style="padding-top:0">
+    <div class="feature-cards">
+      <div class="feat-card reveal"><div class="feat-icon">🎯</div><h4>Precision Entry Signals</h4><p>Visual buy/sell arrows plotted directly on the chart at optimal entry zones based on STM confluence rules.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🧱</div><h4>Order Block Detection</h4><p>Automatically highlights institutional order blocks and fair value gaps so you can trade with the big money.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">📊</div><h4>Trend Strength Meter</h4><p>Real-time dashboard showing trend direction and momentum across multiple timeframes simultaneously.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🔔</div><h4>Smart Alerts</h4><p>Push notifications, email, and MT4/MT5 alerts fired the instant a high-probability setup appears.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">🛡️</div><h4>Auto Risk Calculator</h4><p>Calculates precise lot size for every trade based on your account balance and risk percentage — zero guesswork.</p></div>
+      <div class="feat-card reveal"><div class="feat-icon">♾️</div><h4>Lifetime Updates</h4><p>Every version upgrade is free for existing customers. STM HACKS evolves as the market does.</p></div>
+    </div>
+    <div style="margin-top:60px;text-align:center">
+      <div style="font-size:3rem;font-weight:900;color:var(--teal);margin-bottom:8px">$197</div>
+      <div style="color:var(--text-dim);margin-bottom:24px;font-size:0.9rem">One-time payment · Lifetime access · Works on MT4 & MT5</div>
+      <a class="btn-solid" style="font-size:1.05rem;padding:16px 40px" onclick="showToast('Processing... Redirecting to checkout!')">⚡ Buy STM HACKS Now</a>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: AUDIO BOOK -->
+<!-- ============================================================ -->
+<div class="page" id="page-audiobook">
+  <div style="position:relative;overflow:hidden">
+    <div class="audio-bg"></div>
+    <div class="section">
+      <div style="text-align:center;margin-bottom:50px">
+        <div class="section-tag">🎧 Audio Library</div>
+        <h2 class="section-title">Trading Psychology Audio Book</h2>
+        <p class="section-sub" style="margin:0 auto">Master the mental game of trading. 12 expert-narrated chapters on building the mindset of a professional trader.</p>
+      </div>
+      <div class="player-wrap">
+        <div class="player-cover"><div class="cover-art">📈</div><div class="soundwave" id="soundwave"></div></div>
+        <div class="track-info"><div class="track-title" id="trackTitle">The Psychology of Winning Trades</div><div class="track-author">10FX Trading Academy</div></div>
+        <div class="progress-wrap"><div class="progress-bar"><div class="progress-fill"></div></div><div class="progress-times"><span>12:42</span><span>36:15</span></div></div>
+        <div class="player-controls">
+          <button class="ctrl-btn">⏮</button>
+          <button class="ctrl-btn">↺</button>
+          <button class="ctrl-play" id="playBtn" onclick="togglePlay()">▶</button>
+          <button class="ctrl-btn">↻</button>
+          <button class="ctrl-btn">⏭</button>
+        </div>
+      </div>
+      <div class="tracklist" style="max-width:600px;margin:40px auto 0">
+        <div style="font-size:0.75rem;letter-spacing:2px;color:var(--text-dim);text-transform:uppercase;margin-bottom:8px">All Chapters</div>
+        <div class="track-item playing" onclick="selectTrack(this,'The Psychology of Winning Trades')"><div class="track-num">▶</div><div class="track-name">The Psychology of Winning Trades</div><div class="track-dur">36:15</div></div>
+        <div class="track-item" onclick="selectTrack(this,'Fear, Greed & The Trader')"><div class="track-num">2</div><div class="track-name">Fear, Greed & The Trader</div><div class="track-dur">28:40</div></div>
+        <div class="track-item" onclick="selectTrack(this,'Building an Unbreakable Routine')"><div class="track-num">3</div><div class="track-name">Building an Unbreakable Routine</div><div class="track-dur">31:22</div></div>
+        <div class="track-item" onclick="selectTrack(this,'The Art of Letting Go (Losses)')"><div class="track-num">4</div><div class="track-name">The Art of Letting Go (Losses)</div><div class="track-dur">24:55</div></div>
+        <div class="track-item" onclick="selectTrack(this,'Patience: The Ultimate Edge')"><div class="track-num">5</div><div class="track-name">Patience: The Ultimate Edge</div><div class="track-dur">22:10</div></div>
+        <div class="track-item" onclick="selectTrack(this,'Confidence Without Overconfidence')"><div class="track-num">6</div><div class="track-name">Confidence Without Overconfidence</div><div class="track-dur">29:48</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: BLOGS -->
+<!-- ============================================================ -->
+<div class="page" id="page-blogs">
+  <div class="section">
+    <div class="section-tag">📰 Market Intel</div>
+    <h2 class="section-title">Analysis & Insights</h2>
+    <p class="section-sub">Stay ahead with institutional-grade market analysis, strategy breakdowns, and trading news.</p>
+    <div class="blog-grid">
+      <div class="blog-card reveal"><div class="blog-thumb bt-1"><span>📉</span></div><div class="blog-body"><div class="blog-cat">Technical Analysis</div><h3>Gold's Next Move: The $2400 Breakout Setup</h3><p>We break down the key order blocks and liquidity pools setting up XAU/USD for a potential explosive move through $2,400.</p><div class="blog-meta"><span>📅 Apr 2026</span><span>⏱ 7 min read</span><span>👁 3.2K views</span></div></div></div>
+      <div class="blog-card reveal"><div class="blog-thumb bt-2"><span>💱</span></div><div class="blog-body"><div class="blog-cat">Market Outlook</div><h3>EUR/USD Weekly Bias: Why We're Watching 1.0850</h3><p>A detailed breakdown of macro drivers, institutional positioning, and the technical levels that matter for EUR/USD this week.</p><div class="blog-meta"><span>📅 Apr 2026</span><span>⏱ 5 min read</span><span>👁 2.1K views</span></div></div></div>
+      <div class="blog-card reveal"><div class="blog-thumb bt-3"><span>🧠</span></div><div class="blog-body"><div class="blog-cat">Psychology</div><h3>Why 90% of Traders Blow Accounts (And How to Not Be One)</h3><p>The real reasons behind retail trader failure — and the psychological rewiring needed to cross into the profitable 10%.</p><div class="blog-meta"><span>📅 Mar 2026</span><span>⏱ 9 min read</span><span>👁 8.7K views</span></div></div></div>
+      <div class="blog-card reveal"><div class="blog-thumb bt-4"><span>⚡</span></div><div class="blog-body"><div class="blog-cat">Strategy</div><h3>STM Strategy 4.0: A Complete Breakdown for Beginners</h3><p>Never heard of STM 4.0? This comprehensive guide walks you through every component of our flagship trading system.</p><div class="blog-meta"><span>📅 Mar 2026</span><span>⏱ 12 min read</span><span>👁 5.5K views</span></div></div></div>
+      <div class="blog-card reveal"><div class="blog-thumb bt-5"><span>🏦</span></div><div class="blog-body"><div class="blog-cat">Prop Trading</div><h3>How to Pass a Prop Firm Challenge Using STM</h3><p>A step-by-step guide to tackling FTMO, MyFundedFx and other funded challenges using the STM framework and risk rules.</p><div class="blog-meta"><span>📅 Feb 2026</span><span>⏱ 8 min read</span><span>👁 4.3K views</span></div></div></div>
+      <div class="blog-card reveal"><div class="blog-thumb bt-6"><span>📊</span></div><div class="blog-body"><div class="blog-cat">Risk Management</div><h3>The 1% Rule Isn't Enough: Advanced Position Sizing</h3><p>We go beyond the basics of risk management — portfolio heat, correlation risk, and dynamic sizing for advanced traders.</p><div class="blog-meta"><span>📅 Feb 2026</span><span>⏱ 6 min read</span><span>👁 2.8K views</span></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: CONTACT -->
+<!-- ============================================================ -->
+<div class="page" id="page-contact">
+  <div class="section">
+    <div class="section-tag">📬 Get In Touch</div>
+    <h2 class="section-title">Contact Us</h2>
+    <p class="section-sub">Have questions? Ready to start your journey? We're here — reach out and our team will respond within 24 hours.</p>
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-info-item"><div class="ci-icon">✉️</div><div class="ci-text"><h4>Email</h4><p>support@10fxtradingacademy.com</p></div></div>
+        <div class="contact-info-item"><div class="ci-icon">📲</div><div class="ci-text"><h4>Telegram</h4><p>@10FXTradingAcademy</p></div></div>
+        <div class="contact-info-item"><div class="ci-icon">📸</div><div class="ci-text"><h4>Instagram</h4><p>@10fx_tradingacademy</p></div></div>
+        <div class="contact-info-item"><div class="ci-icon">🕐</div><div class="ci-text"><h4>Response Time</h4><p>Within 24 hours (weekdays)</p></div></div>
+        <div style="padding:24px;border-radius:12px;background:rgba(0,245,212,0.06);border:1px solid rgba(0,245,212,0.18)"><div style="font-size:0.8rem;color:var(--teal);letter-spacing:1px;margin-bottom:8px">OFFICE HOURS</div><div style="font-size:0.88rem;color:var(--silver-dim);line-height:1.8">Monday – Friday: 8AM – 8PM GMT<br>Saturday: 10AM – 4PM GMT<br>Sunday: Closed</div></div>
+      </div>
+      <div class="contact-form-card">
+        <h3>Send a Message</h3>
+        <div style="display:flex;flex-direction:column;gap:16px">
+          <div class="form-group"><label>Full Name</label><input type="text" placeholder="Your full name"></div>
+          <div class="form-group"><label>Email</label><input type="email" placeholder="your@email.com"></div>
+          <div class="form-group"><label>Subject</label><select><option>General Enquiry</option><option>Course Information</option><option>Signal Group</option><option>Mentorship Booking</option><option>STM HACKS Purchase</option><option>Technical Support</option></select></div>
+          <div class="form-group"><label>Message</label><textarea placeholder="How can we help you?"></textarea></div>
+          <button class="btn-solid" onclick="showToast('Message sent! We\'ll respond within 24hrs.')">Send Message 🚀</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================================================ -->
+<!-- PAGE: FAQS -->
+<!-- ============================================================ -->
+<div class="page" id="page-faqs">
+  <div class="section">
+    <div style="text-align:center;margin-bottom:60px">
+      <div class="section-tag">❓ Help Centre</div>
+      <h2 class="section-title">Frequently Asked Questions</h2>
+      <p class="section-sub" style="margin:0 auto">Everything you need to know about 10FX Trading Academy, our programs, and getting started.</p>
+    </div>
+    <div class="faq-list">
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Do I need prior trading experience to join?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">No prior experience is required. Our Forex Foundations course starts from absolute zero and guides you through everything step-by-step. Whether you've never heard of a pip or you're an intermediate trader looking to level up, 10FX has a program designed for you.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What is the STM Strategy 4.0?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">STM (Sniper Trading Method) 4.0 is our proprietary trading strategy developed and refined over 4 years of live market execution. It combines smart money concepts, order block analysis, and precise entry models into a single, systematic framework that consistently delivers high-probability trades across major forex pairs and gold.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How do I receive trading signals?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">All signals are delivered via our private Telegram group in real time. Each signal includes the currency pair, entry price, stop loss, take profit levels, and the analysis behind the trade. You'll also receive updates when signals hit targets or if conditions change.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What platform does the STM HACKS indicator work on?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">STM HACKS is compatible with both MetaTrader 4 (MT4) and MetaTrader 5 (MT5) — the world's most popular trading platforms. After purchase, you receive an installation guide and the indicator files. Our support team assists with setup if needed.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Is the mentorship available globally?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">Yes, our one-on-one mentorship is conducted entirely via Zoom and is available to traders worldwide. Sessions are scheduled to accommodate your timezone. All you need is a stable internet connection and a trading platform installed on your device.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">What is your signal group win rate?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">Our verified monthly average win rate sits at 87%, with gold (XAU/USD) consistently performing above 90%. All historical performance data is available within the signal group for full transparency. Remember that past performance does not guarantee future results — proper risk management is always required.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">Can I get a refund if I'm not satisfied?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">We offer a 7-day satisfaction guarantee on all course purchases. If you genuinely feel the course didn't deliver value, contact us within 7 days of purchase and we'll process your refund — no questions asked. The STM HACKS indicator and mentorship packages have specific terms outlined at checkout.</div></div></div>
+      <div class="faq-item"><div class="faq-q" onclick="toggleFaq(this)">How do I get started with 10FX?<div class="faq-icon">+</div></div><div class="faq-a"><div class="faq-a-inner">The easiest path is to start with our free Forex Foundations module — no credit card required. From there, you can join our Telegram community, upgrade to a paid course, or book a discovery call with our mentorship team to find the right program for your goals.</div></div></div>
+    </div>
+    <div style="margin-top:60px;text-align:center;padding:40px;border-radius:18px;background:var(--glass);border:1px solid var(--glass-b)">
+      <div style="font-size:2rem;margin-bottom:12px">💬</div>
+      <h3 style="margin-bottom:10px">Still have questions?</h3>
+      <p style="color:var(--text-dim);font-size:0.9rem;margin-bottom:24px">Our team is ready to help. Reach out and we'll get back to you within 24 hours.</p>
+      <a class="btn-solid" onclick="navigate('contact')">Contact Support</a>
+    </div>
+  </div>
+</div>
+
+</div><!-- /app -->
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div class="footer-brand">
+      <img src="logo.png" alt="10FX" onerror="this.outerHTML='<div style=\'font-size:1.8rem;font-weight:900;background:linear-gradient(135deg,#c0c8d8,#00f5d4);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;margin-bottom:16px\'>10FX</div>'">
+      <p>Empowering traders with elite education, live signals, and proven strategies since 2022. Your journey to consistent profitability starts here.</p>
+    </div>
+    <div class="footer-col"><h5>Programs</h5><a onclick="navigate('courses')">Forex Foundations</a><a onclick="navigate('courses')">Technical Analysis</a><a onclick="navigate('courses')">STM Strategy 4.0</a><a onclick="navigate('mentorship')">1-on-1 Mentorship</a><a onclick="navigate('indicator')">STM HACKS</a></div>
+    <div class="footer-col"><h5>Resources</h5><a onclick="navigate('signals')">Signal Group</a><a onclick="navigate('audiobook')">Audio Book</a><a onclick="navigate('blogs')">Market Analysis</a><a onclick="navigate('faqs')">FAQs</a></div>
+    <div class="footer-col"><h5>Company</h5><a onclick="navigate('contact')">Contact Us</a><a href="#">Privacy Policy</a><a href="#">Terms of Service</a><a href="#">Risk Disclaimer</a></div>
+  </div>
+  <div class="footer-bottom">
+    <div>© 2026 10FX Trading Academy. All rights reserved. Trading involves risk.</div>
+    <div class="social-links">
+      <a class="social-link" href="#" title="Telegram">✈</a>
+      <a class="social-link" href="#" title="Instagram">◈</a>
+      <a class="social-link" href="#" title="YouTube">▶</a>
+      <a class="social-link" href="#" title="Twitter/X">✕</a>
+    </div>
+  </div>
+</footer>
+
+<div class="toast" id="toast"></div>
+
+<!-- ============================================================ -->
+<!-- JAVASCRIPT -->
+<!-- ============================================================ -->
+<script>
+'use strict';
+
+/* ---- ROUTER ---- */
+const pages = ['home','courses','signals','mentorship','indicator','audiobook','blogs','contact','faqs'];
+let currentPage = 'home';
+
+function navigate(page) {
+  if (!pages.includes(page)) return;
+  document.getElementById('page-' + currentPage).classList.remove('active');
+  document.getElementById('page-' + page).classList.add('active');
+  document.querySelectorAll('.nav-links a').forEach(a => a.classList.remove('active'));
+  const navEl = document.getElementById('nav-' + page);
+  if (navEl) navEl.classList.add('active');
+  currentPage = page;
+  window.scrollTo({top: 0, behavior:'smooth'});
+  if (page === 'signals')    initSignalPage();
+  if (page === 'mentorship') initParticles();
+  if (page === 'indicator')  initChartCanvas();
+  if (page === 'audiobook')  initSoundwave();
+  setTimeout(observeReveal, 100);
+}
+
+/* ---- CURSOR ---- */
+const dot  = document.getElementById('cursor-dot');
+const ring = document.getElementById('cursor-ring');
+let mx = 0, my = 0, rx = 0, ry = 0;
+document.addEventListener('mousemove', e => { mx = e.clientX; my = e.clientY; });
+document.addEventListener('mouseover', e => { if (['A','BUTTON'].includes(e.target.tagName)) ring.classList.add('expand'); });
+document.addEventListener('mouseout',  e => { if (['A','BUTTON'].includes(e.target.tagName)) ring.classList.remove('expand'); });
+(function animCursor() {
+  rx += (mx - rx) * 0.12; ry += (my - ry) * 0.12;
+  dot.style.left  = mx + 'px'; dot.style.top  = my + 'px';
+  ring.style.left = rx + 'px'; ring.style.top = ry + 'px';
+  requestAnimationFrame(animCursor);
+})();
+
+/* ---- SCROLL PROGRESS ---- */
+window.addEventListener('scroll', () => {
+  const s = document.documentElement;
+  const pct = (s.scrollTop / (s.scrollHeight - s.clientHeight)) * 100;
+  document.getElementById('scroll-progress').style.width = pct + '%';
+  document.getElementById('navbar').classList.toggle('scrolled', window.scrollY > 40);
+});
+
+/* ---- LOADER ---- */
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('loader').classList.add('hide');
+    initHeroCanvas();
+    initMiniChart();
+    initHeroParticles();
+    initHomeTicker();
+    buildSignalsGrid();
+    buildWeekBars();
+    buildTestimonials();
+    initScrollCounter();
+    initPsychMeters();
+    observeReveal();
+  }, 2400);
+});
+
+/* ---- MOBILE MENU ---- */
+function toggleMenu() { document.getElementById('mobileMenu').classList.toggle('open'); }
+
+/* ---- TOP TICKER ---- */
+const tickerData = [
+  {sym:'EUR/USD', val:'1.0847', chg:'+0.12%', up:true},
+  {sym:'GBP/USD', val:'1.2634', chg:'+0.08%', up:true},
+  {sym:'USD/JPY', val:'154.32', chg:'-0.22%', up:false},
+  {sym:'XAU/USD', val:'2338.40', chg:'+0.54%', up:true},
+  {sym:'GBP/JPY', val:'194.87', chg:'-0.15%', up:false},
+  {sym:'USD/CHF', val:'0.9012', chg:'-0.09%', up:false},
+  {sym:'AUD/USD', val:'0.6541', chg:'+0.19%', up:true},
+  {sym:'NZD/USD', val:'0.5987', chg:'+0.11%', up:true},
+  {sym:'EUR/GBP', val:'0.8587', chg:'+0.04%', up:true},
+  {sym:'NAS100',  val:'18420',  chg:'+0.32%', up:true},
+  {sym:'US30',    val:'39248',  chg:'+0.18%', up:true},
+  {sym:'BTC/USD', val:'62840',  chg:'-1.2%',  up:false},
+];
+(function buildTicker() {
+  const track = document.getElementById('tickerTrack');
+  const html = [...tickerData,...tickerData].map(t => `
+    <div class="ticker-item">
+      <span class="ticker-sym">${t.sym}</span>
+      <span class="ticker-val">${t.val}</span>
+      <span class="ticker-chg ${t.up?'up':'down'}">${t.chg}</span>
+    </div>`).join('');
+  track.innerHTML = html;
+})();
+setInterval(() => {
+  document.querySelectorAll('.ticker-val').forEach(el => {
+    const v = parseFloat(el.textContent);
+    el.textContent = (v + (Math.random()-.5)*0.002*v).toFixed(v > 1000 ? 0 : 4);
+  });
+}, 2000);
+
+/* ---- HOME TICKER ---- */
+function initHomeTicker() {
+  const track = document.getElementById('homeTicker');
+  const html = [...tickerData,...tickerData].map(t => `
+    <div class="home-ticker-item">
+      <span class="ht-pair">${t.sym}</span>
+      <span class="ht-price">${t.val}</span>
+      <span class="ht-chg ${t.up?'ht-up':'ht-down'}">${t.chg}</span>
+    </div>`).join('');
+  track.innerHTML = html;
+}
+
+/* ---- HERO CANVAS ---- */
+function initHeroCanvas() {
+  const canvas = document.getElementById('heroCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let W, H, pts = [];
+
+  function resize() { W = canvas.width = canvas.offsetWidth; H = canvas.height = canvas.offsetHeight; }
+  resize(); window.addEventListener('resize', resize);
+
+  let points = [];
+  const NUM = 120;
+  for (let i = 0; i < NUM; i++) points.push(Math.random() * 0.4 + 0.3);
+
+  function step() {
+    const last = points[points.length-1];
+    const next = Math.max(0.05, Math.min(0.95, last + (Math.random()-0.49)*0.04));
+    points.push(next);
+    if (points.length > NUM+60) points.shift();
+  }
+
+  function draw() {
+    ctx.clearRect(0,0,W,H);
+    const slice = W/(NUM-1);
+    const pts = points.slice(-NUM);
+    const grad = ctx.createLinearGradient(0,0,0,H);
+    grad.addColorStop(0,'rgba(0,245,212,0.15)'); grad.addColorStop(1,'rgba(0,245,212,0)');
+    ctx.beginPath();
+    pts.forEach((v,i) => { const x=i*slice,y=H-v*H; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.lineTo(W,H); ctx.lineTo(0,H); ctx.closePath();
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.beginPath();
+    pts.forEach((v,i) => { const x=i*slice,y=H-v*H; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.strokeStyle='rgba(0,245,212,0.5)'; ctx.lineWidth=1.5; ctx.stroke();
+  }
+
+  let frame=0;
+  (function loop() { frame++; if(frame%4===0) step(); draw(); requestAnimationFrame(loop); })();
+}
+
+/* ---- MINI CHART ---- */
+function initMiniChart() {
+  const canvas = document.getElementById('miniChartCanvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  let pts = [];
+  for (let i = 0; i < 40; i++) pts.push(Math.random()*0.5+0.2);
+
+  function draw() {
+    ctx.clearRect(0,0,w,h);
+    const slice = w/(pts.length-1);
+    const grad = ctx.createLinearGradient(0,0,0,h);
+    grad.addColorStop(0,'rgba(0,245,212,0.3)'); grad.addColorStop(1,'rgba(0,245,212,0)');
+    ctx.beginPath();
+    pts.forEach((v,i)=>{ const x=i*slice,y=h-v*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.lineTo(w,h); ctx.lineTo(0,h); ctx.closePath();
+    ctx.fillStyle=grad; ctx.fill();
+    ctx.beginPath();
+    pts.forEach((v,i)=>{ const x=i*slice,y=h-v*h; i===0?ctx.moveTo(x,y):ctx.lineTo(x,y); });
+    ctx.strokeStyle='rgba(0,245,212,0.8)'; ctx.lineWidth=2;
+    ctx.shadowColor='rgba(0,245,212,0.6)'; ctx.shadowBlur=6; ctx.stroke(); ctx.shadowBlur=0;
+  }
+
+  setInterval(()=>{
+    const last=pts[pts.length-1];
+    pts.push(Math.max(0.1,Math.min(0.9,last+(Math.random()-0.46)*0.06)));
+    if(pts.length>40) pts.shift();
+    draw();
+  },300);
+  draw();
+}
+
+/* ---- HERO PARTICLES ---- */
+function initHeroParticles() {
+  const container = document.getElementById('heroParticles');
+  if (!container) return;
+  for (let i = 0; i < 28; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random()*100+'vw';
+    p.style.setProperty('--dur', (6+Math.random()*8)+'s');
+    p.style.setProperty('--delay', (Math.random()*8)+'s');
+    p.style.opacity = Math.random()*0.6+0.2;
+    container.appendChild(p);
+  }
+}
+
+/* ---- SIGNALS GRID ---- */
+function buildSignalsGrid() {
+  const signals = [
+    { pair:'XAUUSD', type:'BUY',  entry:'2318.50', sl:'2305.00', tp1:'2332.00', tp2:'2348.00', result:'WIN',     rr:'+2.4R', status:'win' },
+    { pair:'EURUSD', type:'SELL', entry:'1.0875',  sl:'1.0900',  tp1:'1.0840',  tp2:'1.0815',  result:'WIN',     rr:'+1.8R', status:'win' },
+    { pair:'GBPJPY', type:'BUY',  entry:'195.20',  sl:'194.60',  tp1:'196.00',  tp2:'197.20',  result:'PENDING', rr:'Live',  status:'pending' },
+    { pair:'USDJPY', type:'SELL', entry:'154.50',  sl:'155.20',  tp1:'153.60',  tp2:'152.80',  result:'WIN',     rr:'+3.1R', status:'win' },
+    { pair:'BTCUSD', type:'BUY',  entry:'66,800',  sl:'65,200',  tp1:'68,400',  tp2:'70,000',  result:'WIN',     rr:'+2.0R', status:'win' },
+    { pair:'GBPUSD', type:'SELL', entry:'1.2680',  sl:'1.2720',  tp1:'1.2620',  tp2:'1.2560',  result:'LOSS',    rr:'-1R',   status:'loss' },
+  ];
+  const grid = document.getElementById('signalsGrid');
+  if (!grid) return;
+  const statusMap = {win:'result-win',loss:'result-loss',pending:'result-pending'};
+  const glowMap   = {win:'glow-green',loss:'glow-red',pending:'glow-teal'};
+  const emojiMap  = {win:'✓',loss:'✗',pending:'●'};
+  signals.forEach(s => {
+    const card = document.createElement('div');
+    card.className = `signal-card ${s.status} reveal`;
+    card.innerHTML = `
+      <div class="signal-header">
+        <div><div class="signal-pair">${s.pair}</div><small style="color:var(--text-dim);font-size:0.75rem">Market Order</small></div>
+        <span class="signal-type ${s.type==='BUY'?'type-buy':'type-sell'}">${s.type}</span>
+      </div>
+      <div class="signal-levels">
+        <div class="level-row"><span class="level-label">Entry</span><span class="level-value">${s.entry}</span></div>
+        <div class="level-row"><span class="level-label">Stop Loss</span><span class="level-value" style="color:var(--red)">${s.sl}</span></div>
+        <div class="level-row"><span class="level-label">TP 1</span><span class="level-value" style="color:var(--green)">${s.tp1}</span></div>
+        <div class="level-row" style="border:none"><span class="level-label">TP 2</span><span class="level-value" style="color:var(--green)">${s.tp2}</span></div>
+      </div>
+      <div class="signal-result">
+        <span class="result-badge ${statusMap[s.status]}">
+          <span class="result-glow ${glowMap[s.status]}"></span>
+          ${emojiMap[s.status]} ${s.result}
+        </span>
+        <span style="font-weight:700;font-size:0.95rem;color:${s.status==='win'?'var(--green)':s.status==='loss'?'var(--red)':'var(--teal)'}">${s.rr}</span>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+/* ---- PSYCH METERS ---- */
+function initPsychMeters() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.psych-meter-fill').forEach(fill => {
+          setTimeout(()=>{ fill.style.width = fill.dataset.width+'%'; }, 200);
+        });
+      }
+    });
+  }, {threshold:0.3});
+  document.querySelectorAll('.psych-card').forEach(el => obs.observe(el));
+}
+
+/* ---- WEEK BARS ---- */
+function buildWeekBars() {
+  const weeks = [
+    {label:'Week 1', val:'+4.2R', pct:70, positive:true},
+    {label:'Week 2', val:'+7.8R', pct:100, positive:true},
+    {label:'Week 3', val:'-1.0R', pct:16,  positive:false},
+    {label:'Week 4', val:'+5.5R', pct:82,  positive:true},
+  ];
+  const container = document.getElementById('weekBars');
+  if (!container) return;
+  weeks.forEach(w => {
+    const wrap = document.createElement('div');
+    wrap.className = 'week-bar-wrap';
+    wrap.innerHTML = `<div class="week-val">${w.val}</div><div class="week-bar ${w.positive?'positive':'negative'}" data-pct="${w.pct}" style="height:0px"></div><div class="week-label">${w.label}</div>`;
+    container.appendChild(wrap);
+  });
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.querySelectorAll('.week-bar').forEach(bar => {
+          setTimeout(()=>{ bar.style.height = bar.dataset.pct+'px'; }, 200);
+        });
+        obs.unobserve(entry.target);
+      }
+    });
+  }, {threshold:0.4});
+  obs.observe(container);
+}
+
+/* ---- TESTIMONIALS ---- */
+function buildTestimonials() {
+  const data = [
+    [{name:'James O.',country:'🇳🇬',stars:5,profit:'+$1,240',text:'"10FX completely changed how I approach the market. The SMC course alone was worth 10x the price. I went from blowing accounts to being consistently profitable in 3 months."'},
+     {name:'Priya S.',country:'🇿🇦',stars:5,profit:'+$880',text:'"The signals are incredibly accurate. I\'ve been following them for 6 weeks and hit 9 out of 12 setups. The Telegram group is super active and educational too."'}],
+    [{name:'Marcus T.',country:'🇬🇧',stars:5,profit:'+$2,100',text:'"VIP membership is a no-brainer. The 1-on-1 calls with the mentor helped me identify my exact weaknesses. Passed my FTMO challenge on the second attempt!"'},
+     {name:'Aisha K.',country:'🇰🇪',stars:5,profit:'+$560',text:'"I was skeptical of forex education at first, but this is the real deal. No hype, no nonsense — just clear concepts explained well. The psychology section hit different."'}],
+    [{name:'Tunde A.',country:'🇳🇬',stars:5,profit:'+$3,400',text:'"From retail trader to funded trader in 4 months. The Prop Firm Prep program in VIP is absolutely elite. Every trader should invest in this kind of education."'},
+     {name:'Sophie M.',country:'🇫🇷',stars:5,profit:'+$720',text:'"The live trading sessions are priceless. Watching the mentor analyze in real-time and explain the thought process is better than any book I\'ve read. Worth every cent."'}],
+  ];
+  const track = document.getElementById('testimonialsTrack');
+  const dotsContainer = document.getElementById('carouselDots');
+  if (!track || !dotsContainer) return;
+  let current = 0;
+
+  data.forEach((pair, i) => {
+    const slide = document.createElement('div');
+    slide.className = 'testimonial-slide';
+    pair.forEach(t => {
+      const card = document.createElement('div');
+      card.className = 't-card';
+      card.innerHTML = `
+        <div class="t-stars">${'★'.repeat(t.stars)}</div>
+        <p class="t-text">${t.text}</p>
+        <div class="t-footer">
+          <div><div class="t-name">${t.country} ${t.name}</div><div class="t-verified">✓ Verified Member</div></div>
+          <div class="t-profit">${t.profit}</div>
+        </div>`;
+      slide.appendChild(card);
+    });
+    track.appendChild(slide);
+    const dot = document.createElement('div');
+    dot.className = 'dot' + (i===0?' active':'');
+    dot.addEventListener('click', ()=>goTo(i));
+    dotsContainer.appendChild(dot);
+  });
+
+  function goTo(index) {
+    current = index;
+    track.style.transform = `translateX(-${current*100}%)`;
+    document.querySelectorAll('.dot').forEach((d,i)=>d.classList.toggle('active',i===current));
+  }
+
+  document.getElementById('prevBtn').addEventListener('click', ()=>goTo((current-1+data.length)%data.length));
+  document.getElementById('nextBtn').addEventListener('click', ()=>goTo((current+1)%data.length));
+  setInterval(()=>goTo((current+1)%data.length), 6000);
+}
+
+/* ---- SCROLL COUNTER ---- */
+function initScrollCounter() {
+  const obs = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      const el = e.target;
+      const target = parseInt(el.dataset.target);
+      let cur = 0; const step = target/60;
+      const t = setInterval(()=>{
+        cur+=step; if(cur>=target){cur=target;clearInterval(t);}
+        el.textContent = Math.floor(cur).toLocaleString();
+      }, 16);
+      obs.unobserve(el);
+    });
+  }, {threshold:0.5});
+  document.querySelectorAll('.counter').forEach(c=>obs.observe(c));
+}
+
+/* ---- REVEAL ---- */
+function observeReveal() {
+  const els = document.querySelectorAll('.reveal:not(.visible)');
+  if (!els.length) return;
+  const obs = new IntersectionObserver((entries)=>{
+    entries.forEach((e,i)=>{
+      if(e.isIntersecting){
+        setTimeout(()=>e.target.classList.add('visible'), i*80);
+        obs.unobserve(e.target);
+      }
+    });
+  },{threshold:0.12,rootMargin:'0px 0px -40px 0px'});
+  els.forEach(el=>obs.observe(el));
+}
+setTimeout(observeReveal, 2500);
+
+/* ---- SIGNAL PAGE ---- */
+function initSignalPage() {
+  setTimeout(()=>{
+    const bar = document.getElementById('wrBar');
+    const num = document.getElementById('wrNum');
+    if(!bar) return;
+    const pct=87, circ=2*Math.PI*90;
+    bar.style.strokeDashoffset = circ*(1-pct/100);
+    let c=0; const t=setInterval(()=>{ c++; if(c>=pct){c=pct;clearInterval(t);} num.innerHTML=c+'<small>%</small><br><span style="font-size:0.65rem;color:var(--text-dim)">Win Rate</span>'; },20);
+    animateVal('cntWin',26,20); animateVal('cntLoss',4,20); animateVal('cntPips',1842,8);
+    document.querySelectorAll('.perf-bar[data-w]').forEach(b=>{ setTimeout(()=>{b.style.width=b.dataset.w;},300); });
+  },300);
+}
+function animateVal(id,target,delay) {
+  const el=document.getElementById(id); if(!el) return;
+  let c=0; const step=target/60;
+  const t=setInterval(()=>{ c+=step; if(c>=target){c=target;clearInterval(t);} el.textContent=Math.floor(c).toLocaleString(); },delay);
+}
+
+/* ---- PARTICLES (Mentorship) ---- */
+function initParticles() {
+  const canvas=document.getElementById('particleCanvas'); if(!canvas||canvas.dataset.init) return;
+  canvas.dataset.init='true'; const ctx=canvas.getContext('2d'); let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth||800;H=canvas.height=canvas.offsetHeight||600;}
+  resize();
+  const pts=Array.from({length:40},()=>({x:Math.random()*W,y:Math.random()*H,vx:(Math.random()-.5)*.3,vy:(Math.random()-.5)*.3,r:Math.random()*3+1}));
+  function draw(){ctx.clearRect(0,0,W,H);pts.forEach(p=>{p.x+=p.vx;p.y+=p.vy;if(p.x<0||p.x>W)p.vx*=-1;if(p.y<0||p.y>H)p.vy*=-1;ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,Math.PI*2);ctx.fillStyle='rgba(0,245,212,0.15)';ctx.fill();});requestAnimationFrame(draw);}
+  draw();
+}
+
+/* ---- CHART CANVAS (STM Indicator) ---- */
+function initChartCanvas() {
+  const canvas=document.getElementById('chartCanvas'); if(!canvas||canvas.dataset.init) return;
+  canvas.dataset.init='true'; const ctx=canvas.getContext('2d'); let W,H;
+  function resize(){W=canvas.width=canvas.offsetWidth||760;H=canvas.height=320;}
+  resize();
+  const bars=[]; let price=2300;
+  for(let i=0;i<60;i++){const open=price,close=price+(Math.random()-.48)*12,high=Math.max(open,close)+Math.random()*6,low=Math.min(open,close)-Math.random()*6;bars.push({open,close,high,low});price=close;}
+  const buySignals=[8,18,32,48],sellSignals=[13,25,40,54],orderBlocks=[{s:6,e:10},{s:22,e:26},{s:38,e:42}];
+  function draw(){
+    ctx.clearRect(0,0,W,H);ctx.fillStyle='#0d1117';ctx.fillRect(0,0,W,H);
+    ctx.strokeStyle='rgba(0,245,212,0.05)';ctx.lineWidth=1;
+    for(let i=0;i<8;i++){const y=H/8*i;ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    for(let i=0;i<12;i++){const x=W/12*i;ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    const bw=W/bars.length*.7,allPrices=bars.flatMap(b=>[b.high,b.low]),minP=Math.min(...allPrices)-5,maxP=Math.max(...allPrices)+5;
+    const scaleY=v=>H-((v-minP)/(maxP-minP))*(H*.85)-H*.05;
+    orderBlocks.forEach(ob=>{const x1=ob.s*(W/bars.length),x2=ob.e*(W/bars.length),mid=(bars[ob.s].open+bars[ob.e].close)/2,y1=scaleY(mid+5),y2=scaleY(mid-5);ctx.fillStyle='rgba(255,214,0,0.08)';ctx.fillRect(x1,y1,x2-x1,y2-y1);ctx.strokeStyle='rgba(255,214,0,0.4)';ctx.lineWidth=1;ctx.strokeRect(x1,y1,x2-x1,y2-y1);});
+    bars.forEach((b,i)=>{const x=i*(W/bars.length)+(W/bars.length-bw)/2,cx=x+bw/2,up=b.close>=b.open,color=up?'#00e676':'#ff5252';ctx.strokeStyle=color;ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(cx,scaleY(b.high));ctx.lineTo(cx,scaleY(b.low));ctx.stroke();const y1=scaleY(Math.max(b.open,b.close)),y2=scaleY(Math.min(b.open,b.close));ctx.fillStyle=color;ctx.fillRect(x,y1,bw,Math.max(y2-y1,1));});
+    buySignals.forEach(i=>{if(i>=bars.length)return;const x=i*(W/bars.length)+W/bars.length/2,y=scaleY(bars[i].low)+18;ctx.fillStyle='#00f5d4';ctx.beginPath();ctx.moveTo(x,y+10);ctx.lineTo(x-6,y);ctx.lineTo(x+6,y);ctx.closePath();ctx.fill();});
+    sellSignals.forEach(i=>{if(i>=bars.length)return;const x=i*(W/bars.length)+W/bars.length/2,y=scaleY(bars[i].high)-18;ctx.fillStyle='#ff5252';ctx.beginPath();ctx.moveTo(x,y-10);ctx.lineTo(x-6,y);ctx.lineTo(x+6,y);ctx.closePath();ctx.fill();});
+  }
+  draw();
+  setInterval(()=>{const last=bars[bars.length-1];bars.shift();const open=last.close,close=open+(Math.random()-.48)*12;bars.push({open,close,high:Math.max(open,close)+Math.random()*6,low:Math.min(open,close)-Math.random()*6});draw();},800);
+}
+
+/* ---- SOUNDWAVE ---- */
+function initSoundwave() {
+  const sw=document.getElementById('soundwave'); if(!sw||sw.childElementCount>0) return;
+  for(let i=0;i<32;i++){const bar=document.createElement('div');bar.className='wave-bar';const h=Math.floor(Math.random()*36+8),d=(Math.random()*.6+.4).toFixed(2);bar.style.cssText=`--h:${h}px;--d:${d}s;animation-delay:${(Math.random()*.5).toFixed(2)}s`;sw.appendChild(bar);}
+}
+
+/* ---- AUDIO PLAYER ---- */
+let isPlaying=false;
+function togglePlay(){isPlaying=!isPlaying;document.getElementById('playBtn').textContent=isPlaying?'⏸':'▶';document.querySelectorAll('.wave-bar').forEach(b=>{b.style.animationPlayState=isPlaying?'running':'paused';});}
+function selectTrack(el,title){document.querySelectorAll('.track-item').forEach(t=>t.classList.remove('playing'));el.classList.add('playing');el.querySelector('.track-num').textContent='▶';document.getElementById('trackTitle').textContent=title;if(!isPlaying){isPlaying=true;document.getElementById('playBtn').textContent='⏸';}}
+
+/* ---- FAQ ---- */
+function toggleFaq(btn){const item=btn.closest('.faq-item'),isOpen=item.classList.contains('open');document.querySelectorAll('.faq-item.open').forEach(i=>i.classList.remove('open'));if(!isOpen)item.classList.add('open');}
+
+/* ---- TOAST ---- */
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3200);}
+</script>
+</body>
+</html>
